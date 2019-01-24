@@ -1,6 +1,12 @@
 # 1. Introduction
 The project is to build a compiler to test our overall knowledge of computer science to date.
 
+### Team: 
+- Joshua Stephenson-Losey
+- Keefer Sands
+- Sean Jungst
+- Brendan Tracey
+
 # 2. Background
 A compiler is code that is used to change one language into another, in our case: change a high level language (Tiny) into machine language that a computer can run. The components are:
 - Scanner - scans the file and brakes into characters to be handled by the parser
