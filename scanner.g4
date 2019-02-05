@@ -1,4 +1,4 @@
-grammar scanner;
+lexer grammar scanner;
 
 fragment DIGIT : [0-9];
 fragment LOWERCASE  : [a-z] ;
@@ -7,23 +7,25 @@ fragment LETTER : LOWERCASE|UPPERCASE;
 fragment CHAR : ('~'|'!'|'@'|'#'|'$'|'%'|'^'|'&'|'*'|'('|')'|'_'
         |'-'|'+'|'='|'{'|'['|']'|'}'|'|'|':'|';'|'<'|'>'|','|'.'
         |'/'|'?'|'\\'|'\''| LETTER);
-fragment KEYWORDS : ('PROGRAM'|'BEGIN'|'END'|'FUNCTION'|'READ'
-        |'WRITE'|'IF'|'ELSE'|'FI'|'FOR'|'ROF'|'RETURN'|'INT'|'VOID'|'STRING'|'FLOAT'|'WHILE'|'ENDIF'|'ENDWHILE');
-fragment KEYWORDS : (':='|'+'|'-'|'*'|'/'|'='|'!='|'<'|'>'|'('
+
+COMMENT: ('--') (CHAR|DIGIT|OPERATORS)* ('\n')+;
+
+STRINGLITERAL: ('"') CHAR+ ('"');
+
+KEYWORDS : ('PROGRAM'|'BEGIN'|'END'|'FUNCTION'|'READ'
+        |'WRITE'|'IF'|'ELSE'|'FI'|'FOR'|'ROF'|'RETURN'
+        |'INT'|'VOID'|'STRING'|'FLOAT'|'WHILE'|'ENDIF'
+        |'ENDWHILE');
+
+OPERATORS : (':='|'+'|'-'|'*'|'/'|'='|'!='|'<'|'>'|'('
         |')'|';'|','|'<='|'>=');
 
-IDENTIFIERS: LETTER + (LETTER*|DIGIT*)*;
+IDENTIFIERS: LETTER + (LETTER|DIGIT)*;
 
 INTLITERAL: DIGIT +;
 
-FLOATLITERAL: DIGIT * ('.'DIGIT+)?;
+FLOATLITERAL: DIGIT '.' DIGIT+;
 
-STRINGLITERAL: ('"')CHAR+('"');
+WHITESPACE : (' ' | '\t' | '\r' | '\f')+ -> skip; 
 
-COMMENT: ('--'.+);
-
-WHITESPACE : [ \t\r\n]+ -> skip;
-
-TOKEN: IDENTIFIERS | COMMENT;
-
-print: 
+NEWLINE : ('\n')+ -> skip;
