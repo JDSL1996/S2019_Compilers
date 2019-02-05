@@ -5,15 +5,9 @@ import java.util.Scanner;
 
 public class Driver {
     public static void main(String[] args) throws Exception {
-        // user input 
-        // TODO: (needs to be from bash)
-        Scanner scan = new Scanner(System.in);
-        System.out.print("File: ");
-        String path = scan.next();
-        System.out.println(path);
-        
         // read method to get the source code
-        String file = new String(Files.readAllBytes(Paths.get(path)));
+        File f =  new File(args[0]);
+        String file = new String(Files.readAllBytes(f.toPath()));
         scanner lexer = new scanner(new ANTLRInputStream(file));
         
         // printer for output

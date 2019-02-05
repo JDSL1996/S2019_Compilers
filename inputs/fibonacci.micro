@@ -1,7 +1,7 @@
 PROGRAM fibonacci
 BEGIN
 
-	--STRING input := "Please input an integer number: ";
+	STRING input := "Please input an integer number: ";
 	STRING space := " ";
 	STRING eol := "\n";
 

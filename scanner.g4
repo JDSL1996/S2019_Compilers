@@ -20,7 +20,7 @@ FLOATLITERAL: DIGIT* '.' DIGIT+;
 STRINGLITERAL: ('"') (COMMENT|NOTCOMMENT)+ ('"');
 
 // every item after -- on a single line
-COMMENT: ('--')(NOTCOMMENT)*;
+COMMENT: ('--')(NOTCOMMENT)* -> skip;
 
 // given
 OPERATOR : (':='|'+'|('-' ~('-'|'0'..'9')?)|'*'|'/'|'='|'!='|'<'|'>'|'('

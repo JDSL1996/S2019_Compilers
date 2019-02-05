@@ -1,0 +1,13 @@
+#!/bin/bash
+# the above line makes this an executable after you tell your computer it is..... idk ask the internet
+
+# set the class path so the call works
+export CLASSPATH=".:/usr/local/lib/antlr-4.7.2-complete.jar:$CLASSPATH"
+
+# this gets the file from the user
+file="$1"
+
+# this compiles and runs the grammer and the driver
+antlr scanner.g4
+javac Driver.java
+java Driver $file
