@@ -8,6 +8,23 @@ export CLASSPATH=".:/usr/local/lib/antlr-4.7.2-complete.jar:$CLASSPATH"
 file="$1"
 
 # this compiles and runs the grammer and the driver
+# antlr -o ./gen_files scanner.g4
+# javac ./Driver.java ./gen_files/*.java
+# java -cp "antlr-4.7.2-complete.jar:lib/*:$CLASSPATH:./gen_files/*" Driver $file
 antlr scanner.g4
-javac Driver2.java
-java Driver2 $file
+javac Driver.java
+java Driver $file
+
+# java Driver test1.micro
+diff -b -y --suppress-common-lines ./inputs/$file.out out.txt
+
+# for value in {1..21}
+# do
+#     if [ $value -eq 11 ] || [ $value -eq 13 ] || [ $value -eq 14 ]; then
+#         continue
+#     fi
+#     echo "Start Test: $value"
+#     java Driver2 test$value.micro
+#     diff -b -y --suppress-common-lines ./outputs/test$value.out out.txt
+#     echo "End Test: $value"
+# done

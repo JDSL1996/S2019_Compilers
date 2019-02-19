@@ -1,4 +1,4 @@
-// Generated from /Users/joshlosey/Desktop/Hw/2019 Spring/S2019_Compilers/scanner.g4 by ANTLR 4.7.1
+// Generated from scanner.g4 by ANTLR 4.7.2
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class scannerParser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.7.1", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.7.2", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -33,29 +33,38 @@ public class scannerParser extends Parser {
 		RULE_call_expr = 28, RULE_expr_list = 29, RULE_expr_list_tail = 30, RULE_primary = 31, 
 		RULE_addop = 32, RULE_mulop = 33, RULE_if_stmt = 34, RULE_else_part = 35, 
 		RULE_cond = 36, RULE_compop = 37, RULE_while_stmt = 38;
-	public static final String[] ruleNames = {
-		"program", "id", "pgm_body", "decl", "string_decl", "str", "var_decl", 
-		"var_type", "any_type", "id_list", "id_tail", "param_decl_list", "param_decl", 
-		"param_decl_tail", "func_declarations", "func_decl", "func_body", "stmt_list", 
-		"stmt", "base_stmt", "assign_stmt", "assign_expr", "read_stmt", "write_stmt", 
-		"return_stmt", "expr", "factor", "postfix_expr", "call_expr", "expr_list", 
-		"expr_list_tail", "primary", "addop", "mulop", "if_stmt", "else_part", 
-		"cond", "compop", "while_stmt"
-	};
+	private static String[] makeRuleNames() {
+		return new String[] {
+			"program", "id", "pgm_body", "decl", "string_decl", "str", "var_decl", 
+			"var_type", "any_type", "id_list", "id_tail", "param_decl_list", "param_decl", 
+			"param_decl_tail", "func_declarations", "func_decl", "func_body", "stmt_list", 
+			"stmt", "base_stmt", "assign_stmt", "assign_expr", "read_stmt", "write_stmt", 
+			"return_stmt", "expr", "factor", "postfix_expr", "call_expr", "expr_list", 
+			"expr_list_tail", "primary", "addop", "mulop", "if_stmt", "else_part", 
+			"cond", "compop", "while_stmt"
+		};
+	}
+	public static final String[] ruleNames = makeRuleNames();
 
-	private static final String[] _LITERAL_NAMES = {
-		null, "'PROGRAM'", "'BEGIN'", "'END'", "'STRING'", "':='", "';'", "'FLOAT'", 
-		"'INT'", "'VOID'", "','", "'FUNCTION'", "'('", "')'", "'READ'", "'WRITE'", 
-		"'RETURN'", "'+'", "'-'", "'*'", "'/'", "'IF'", "'ENDIF'", "'ELSE'", "'<'", 
-		"'>'", "'='", "'!='", "'<='", "'>='", "'WHILE'", "'ENDWHILE'"
-	};
-	private static final String[] _SYMBOLIC_NAMES = {
-		null, null, null, null, null, null, null, null, null, null, null, null, 
-		null, null, null, null, null, null, null, null, null, null, null, null, 
-		null, null, null, null, null, null, null, null, "KEYWORD", "IDENTIFIER", 
-		"INTLITERAL", "FLOATLITERAL", "STRINGLITERAL", "COMMENT", "WHITESPACE", 
-		"OPERATOR", "NEWLINE"
-	};
+	private static String[] makeLiteralNames() {
+		return new String[] {
+			null, "'PROGRAM'", "'BEGIN'", "'END'", "'STRING'", "':='", "';'", "'FLOAT'", 
+			"'INT'", "'VOID'", "','", "'FUNCTION'", "'('", "')'", "'READ'", "'WRITE'", 
+			"'RETURN'", "'+'", "'-'", "'*'", "'/'", "'IF'", "'ENDIF'", "'ELSE'", 
+			"'<'", "'>'", "'='", "'!='", "'<='", "'>='", "'WHILE'", "'ENDWHILE'"
+		};
+	}
+	private static final String[] _LITERAL_NAMES = makeLiteralNames();
+	private static String[] makeSymbolicNames() {
+		return new String[] {
+			null, null, null, null, null, null, null, null, null, null, null, null, 
+			null, null, null, null, null, null, null, null, null, null, null, null, 
+			null, null, null, null, null, null, null, null, "KEYWORD", "IDENTIFIER", 
+			"INTLITERAL", "FLOATLITERAL", "STRINGLITERAL", "COMMENT", "WHITESPACE", 
+			"OPERATOR", "NEWLINE"
+		};
+	}
+	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
 	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
 
 	/**
@@ -105,6 +114,7 @@ public class scannerParser extends Parser {
 		super(input);
 		_interp = new ParserATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}
+
 	public static class ProgramContext extends ParserRuleContext {
 		public IdContext id() {
 			return getRuleContext(IdContext.class,0);
@@ -116,6 +126,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_program; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterProgram(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitProgram(this);
+		}
 	}
 
 	public final ProgramContext program() throws RecognitionException {
@@ -153,6 +171,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_id; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterId(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitId(this);
+		}
 	}
 
 	public final IdContext id() throws RecognitionException {
@@ -187,6 +213,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_pgm_body; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterPgm_body(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitPgm_body(this);
+		}
 	}
 
 	public final Pgm_bodyContext pgm_body() throws RecognitionException {
@@ -226,6 +260,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_decl; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterDecl(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitDecl(this);
+		}
 	}
 
 	public final DeclContext decl() throws RecognitionException {
@@ -293,6 +335,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_string_decl; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterString_decl(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitString_decl(this);
+		}
 	}
 
 	public final String_declContext string_decl() throws RecognitionException {
@@ -330,6 +380,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_str; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterStr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitStr(this);
+		}
 	}
 
 	public final StrContext str() throws RecognitionException {
@@ -364,6 +422,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_var_decl; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterVar_decl(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitVar_decl(this);
+		}
 	}
 
 	public final Var_declContext var_decl() throws RecognitionException {
@@ -396,6 +462,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_var_type; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterVar_type(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitVar_type(this);
+		}
 	}
 
 	public final Var_typeContext var_type() throws RecognitionException {
@@ -436,6 +510,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_any_type; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterAny_type(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitAny_type(this);
+		}
 	}
 
 	public final Any_typeContext any_type() throws RecognitionException {
@@ -486,6 +568,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_id_list; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterId_list(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitId_list(this);
+		}
 	}
 
 	public final Id_listContext id_list() throws RecognitionException {
@@ -522,6 +612,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_id_tail; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterId_tail(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitId_tail(this);
+		}
 	}
 
 	public final Id_tailContext id_tail() throws RecognitionException {
@@ -569,6 +667,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_param_decl_list; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterParam_decl_list(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitParam_decl_list(this);
+		}
 	}
 
 	public final Param_decl_listContext param_decl_list() throws RecognitionException {
@@ -614,6 +720,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_param_decl; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterParam_decl(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitParam_decl(this);
+		}
 	}
 
 	public final Param_declContext param_decl() throws RecognitionException {
@@ -650,6 +764,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_param_decl_tail; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterParam_decl_tail(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitParam_decl_tail(this);
+		}
 	}
 
 	public final Param_decl_tailContext param_decl_tail() throws RecognitionException {
@@ -697,6 +819,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_func_declarations; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterFunc_declarations(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitFunc_declarations(this);
+		}
 	}
 
 	public final Func_declarationsContext func_declarations() throws RecognitionException {
@@ -748,6 +878,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_func_decl; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterFunc_decl(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitFunc_decl(this);
+		}
 	}
 
 	public final Func_declContext func_decl() throws RecognitionException {
@@ -798,6 +936,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_func_body; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterFunc_body(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitFunc_body(this);
+		}
 	}
 
 	public final Func_bodyContext func_body() throws RecognitionException {
@@ -834,6 +980,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_stmt_list; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterStmt_list(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitStmt_list(this);
+		}
 	}
 
 	public final Stmt_listContext stmt_list() throws RecognitionException {
@@ -882,6 +1036,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_stmt; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterStmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitStmt(this);
+		}
 	}
 
 	public final StmtContext stmt() throws RecognitionException {
@@ -947,6 +1109,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_base_stmt; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterBase_stmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitBase_stmt(this);
+		}
 	}
 
 	public final Base_stmtContext base_stmt() throws RecognitionException {
@@ -1007,6 +1177,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_assign_stmt; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterAssign_stmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitAssign_stmt(this);
+		}
 	}
 
 	public final Assign_stmtContext assign_stmt() throws RecognitionException {
@@ -1043,6 +1221,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_assign_expr; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterAssign_expr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitAssign_expr(this);
+		}
 	}
 
 	public final Assign_exprContext assign_expr() throws RecognitionException {
@@ -1078,6 +1264,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_read_stmt; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterRead_stmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitRead_stmt(this);
+		}
 	}
 
 	public final Read_stmtContext read_stmt() throws RecognitionException {
@@ -1117,6 +1311,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_write_stmt; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterWrite_stmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitWrite_stmt(this);
+		}
 	}
 
 	public final Write_stmtContext write_stmt() throws RecognitionException {
@@ -1156,6 +1358,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_return_stmt; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterReturn_stmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitReturn_stmt(this);
+		}
 	}
 
 	public final Return_stmtContext return_stmt() throws RecognitionException {
@@ -1197,6 +1407,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_expr; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterExpr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitExpr(this);
+		}
 	}
 
 	public final ExprContext expr() throws RecognitionException {
@@ -1247,6 +1465,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_factor; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterFactor(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitFactor(this);
+		}
 	}
 
 	public final FactorContext factor() throws RecognitionException {
@@ -1294,6 +1520,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_postfix_expr; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterPostfix_expr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitPostfix_expr(this);
+		}
 	}
 
 	public final Postfix_exprContext postfix_expr() throws RecognitionException {
@@ -1341,6 +1575,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_call_expr; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterCall_expr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitCall_expr(this);
+		}
 	}
 
 	public final Call_exprContext call_expr() throws RecognitionException {
@@ -1381,6 +1623,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_expr_list; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterExpr_list(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitExpr_list(this);
+		}
 	}
 
 	public final Expr_listContext expr_list() throws RecognitionException {
@@ -1426,6 +1676,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_expr_list_tail; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterExpr_list_tail(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitExpr_list_tail(this);
+		}
 	}
 
 	public final Expr_list_tailContext expr_list_tail() throws RecognitionException {
@@ -1475,6 +1733,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_primary; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterPrimary(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitPrimary(this);
+		}
 	}
 
 	public final PrimaryContext primary() throws RecognitionException {
@@ -1536,6 +1802,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_addop; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterAddop(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitAddop(this);
+		}
 	}
 
 	public final AddopContext addop() throws RecognitionException {
@@ -1573,6 +1847,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_mulop; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterMulop(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitMulop(this);
+		}
 	}
 
 	public final MulopContext mulop() throws RecognitionException {
@@ -1622,6 +1904,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_if_stmt; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterIf_stmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitIf_stmt(this);
+		}
 	}
 
 	public final If_stmtContext if_stmt() throws RecognitionException {
@@ -1670,6 +1960,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_else_part; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterElse_part(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitElse_part(this);
+		}
 	}
 
 	public final Else_partContext else_part() throws RecognitionException {
@@ -1724,6 +2022,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_cond; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterCond(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitCond(this);
+		}
 	}
 
 	public final CondContext cond() throws RecognitionException {
@@ -1756,6 +2062,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_compop; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterCompop(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitCompop(this);
+		}
 	}
 
 	public final CompopContext compop() throws RecognitionException {
@@ -1802,6 +2116,14 @@ public class scannerParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_while_stmt; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).enterWhile_stmt(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof scannerListener ) ((scannerListener)listener).exitWhile_stmt(this);
+		}
 	}
 
 	public final While_stmtContext while_stmt() throws RecognitionException {
