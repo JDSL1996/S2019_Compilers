@@ -1,7 +1,6 @@
 import org.antlr.v4.runtime.*;
 import java.nio.file.*;
 import java.io.*;
-import java.util.Scanner;
 
 public class Driver {
     public static void main(String[] args) throws Exception {
