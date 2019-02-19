@@ -9,5 +9,5 @@ file="$1"
 
 # this compiles and runs the grammer and the driver
 antlr scanner.g4
-javac Driver.java
-java Driver $file
+javac Driver2.java
+java Driver2 $file
