@@ -12,8 +12,8 @@ file="$1"
 # javac ./Driver.java ./gen_files/*.java
 # java -cp "antlr-4.7.2-complete.jar:lib/*:$CLASSPATH:./gen_files/*" Driver $file
 antlr scanner.g4
-javac Driver.java
-java Driver $file
+javac Driver2.java
+java Driver2 $file
 
 # java Driver test1.micro
 diff -b -y --suppress-common-lines ./inputs/$file.out out.txt
