@@ -82,8 +82,8 @@ COMMENT: ('--')(CHAR|DIGIT|LETTER|WHITESPACE|OPERATOR)* -> skip;
 // ignore space
 WHITESPACE : [ \t\r]+ -> skip; 
 
-// given
-OPERATOR : (':='|'+'|('-' ~('-'|'0'..'9')?)|'*'|'/'|'='|'!='|'<'|'>'|'('
+// given  ~('-'|'0'..'9')?)
+OPERATOR : (':='|'+'|'-'|'*'|'/'|'='|'!='|'<'|'>'|'('
         |')'|';'|','|'<='|'>=');
 
 // and new lines
