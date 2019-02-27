@@ -1,6 +1,6 @@
 #!/bin/sh
 
-INPUTS=step1/inputs/*
+INPUTS=inputs/*
 mkdir usertest
 for i in $INPUTS
 	do
@@ -10,5 +10,5 @@ for i in $INPUTS
 		output="${name}Test.out"
 		outtest="${name}.out"
 		./Micro $i > usertest/$output
-		diff -B -b -s usertest/$output step1/outputs/$outtest
+		diff -B -b -s usertest/$output outputs/$outtest
 	done

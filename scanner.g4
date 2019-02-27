@@ -59,10 +59,10 @@ compop            : '<' | '>' | '=' | '!=' | '<=' | '>=';
 while_stmt       : 'WHILE' '(' cond ')' decl stmt_list 'ENDWHILE';
 
 // given
-KEYWORD : ('PROGRAM'|'BEGIN'|'END'|'FUNCTION'|'READ'
+KEYWORD: 'PROGRAM'|'BEGIN'|'END'|'FUNCTION'|'READ'
         |'WRITE'|'IF'|'ELSE'|'FI'|'FOR'|'ROF'|'RETURN'
         |'INT'|'VOID'|'STRING'|'FLOAT'|'WHILE'|'ENDIF'
-        |'ENDWHILE');
+        |'ENDWHILE';
 
 // any letter followed by zero or more letters or numbers
 IDENTIFIER: LETTER + (LETTER|DIGIT)*;
