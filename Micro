@@ -3,23 +3,12 @@
 
 # set the class path so the call works
 export CLASSPATH=".:/usr/local/lib/antlr-4.7.2-complete.jar:$CLASSPATH"
+# alias antlr4='java -Xmx500M -cp "/usr/local/lib/antlr-4.7.2-complete.jar:$CLASSPATH" org.antlr.v4.Tool'
 
 # this gets the file from the user
 file="$1"
 
 # this compiles and runs the grammer and the driver
-antlr scanner.g4
-javac Driver2.java
-java Driver2 $file
-
-# The below code will run all 21 test cases minus the hidden tests and check the output vs the expected output
-# for value in {1..21}
-# do
-#     if [ $value -eq 11 ] || [ $value -eq 13 ] || [ $value -eq 14 ]; then
-#         continue
-#     fi
-#     echo "Start Test: $value"
-#     java Driver2 test$value.micro
-#     diff -b -y --suppress-common-lines ./outputs/test$value.out out.txt
-#     echo "End Test: $value"
-# done
+java -Xmx500M -cp "/usr/local/lib/antlr-4.7.2-complete.jar:$CLASSPATH" org.antlr.v4.Tool scanner1.g4
+javac Driver.java
+java Driver $file
