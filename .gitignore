@@ -1,0 +1,4 @@
+*.class
+*.interp
+*.tokens
+scanner*.java
