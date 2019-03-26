@@ -16,21 +16,20 @@ public class Listener extends scannerBaseListener {
             String[][] temp = new String[len + 1][];
             HashSet<String> duplicateCheck = new HashSet<>();
             for (int i = 0; i < len; i++) {
-                if(current[i] != null){
-                    
-                    //duplicateCheck.contains(current[i][0]);
-                    //if(duplicateCheck.contains(current[i][0])){
-                    //    System.out.println("DECLARATION ERROR " + entry[0]);
-                    //    System.exit(1);
-                    //}
-                    //duplicateCheck.add(current[i][0]);
+                if (entry == null){
+                    temp[i] = current[i];
+                    return;
+                }
+                else if(current[i] != null){
+                    duplicateCheck.contains(current[i][0]);
+                    if(duplicateCheck.contains(current[i][0])){
+                       System.out.println("DECLARATION ERROR " + current[i][0]);
+                       System.exit(1);
+                    }
+                    duplicateCheck.add(current[i][0]);
                     temp[i] = current[i];
                 }
             }
-            //if(duplicateCheck.contains(entry[0])){
-              //  System.out.println("DECLARATION ERROR " + entry[0]);
-             //   System.exit(1);
-            //};
             temp[len] = entry;
 
             table.replace(key, temp);
