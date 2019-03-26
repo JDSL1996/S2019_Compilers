@@ -2,6 +2,7 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 import java.nio.file.*;
 import java.util.Hashtable;
+import java.util.Stack;
 import java.io.*;
 
 public class Driver3 {
@@ -24,7 +25,24 @@ public class Driver3 {
             Listener listener = new Listener();
             new ParseTreeWalker().walk(listener, parser.program());
 
-            Hashtable s = listener.getSymbolTable();
+            Hashtable<String, String[][]> s = listener.getSymbolTable();
+            Stack<String> stack = listener.getStack();
+
+            // while (stack.peek() != null) {
+            for (String key : s.keySet()) {
+
+                // String key = stack.poll();
+                System.out.println("Symbol table " + key);
+                for (String[] entry : s.get(key)) {
+
+                    System.out.print("name " + entry[0] + " type " + entry[1]);
+                    if (entry.length == 3) {
+                        System.out.println(" value " + entry[3]);
+                    }
+
+                    System.out.println();
+                }
+            }
 
             // try {
             // parser.program();
