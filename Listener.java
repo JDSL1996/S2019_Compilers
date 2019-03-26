@@ -2,134 +2,174 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import java.util.Hashtable;
-import java.util.Stack;
+import java.util.LinkedHashMap;
+import java.util.HashSet;
 
 public class Listener extends scannerBaseListener {
-    Hashtable<String, String[][]> table = new Hashtable<String, String[][]>();
-    Stack<String> stack = new Stack<String>();
+    LinkedHashMap<String, String[][]> table = new LinkedHashMap<String, String[][]>();
     int blockNum = 0;
 
-    // private void arrayHelper(String key, String[] entry) {
-    // String[][] current = table.get(key);
-    // int len = current.length;
-    // String[][] temp = new String[len + 1];
-
-    // for (int i = 0; i < len - 1; i++) {
-    // temp[i] = current[i];
-    // }
-    // temp[len] = entry;
-
-    // table.replace(key, temp);
-    // }
-
-    private void declHelper(scannerParser.DeclContext context) {
-        while (context.decl() != null) {
-            if (context.string_decl() != null) {
-                scannerParser.String_declContext stringContext = context.string_decl();
-
-                // String[] entry = { stringContext.id().IDENTIFIER(), "STRING",
-                // stringContext.str().STRINGLITERAL() };
-                // arrayHelper(key, entry);
-
-                System.out.println("name " + stringContext.id().IDENTIFIER() + " type STRING value "
-                        + stringContext.str().STRINGLITERAL());
-            } else if (context.var_decl() != null) {
-                scannerParser.Var_declContext varContext = context.var_decl();
-                String type = varContext.var_type().getText();
-                scannerParser.Id_listContext list = varContext.id_list();
-
-                // String[] entry = { list.id().IDENTIFIER(), type };
-                // arrayHelper(key, entry);
-
-                System.out.println("name " + list.id().IDENTIFIER() + " type " + type);
-
-                scannerParser.Id_tailContext next = list.id_tail();
-
-                while (next.id_tail() != null) {
-                    // entry = new String[] { list.id().IDENTIFIER(), type };
-                    // arrayHelper(key, entry);
-
-                    System.out.println("name " + next.id().IDENTIFIER() + " type " + type);
-                    next = next.id_tail();
+    private void arrayHelper(String key, String[] entry) {
+        String[][] current = table.get(key);
+        if (current != null) {
+            int len = current.length;
+            String[][] temp = new String[len + 1][];
+            HashSet<String> duplicateCheck = new HashSet<>();
+            for (int i = 0; i < len; i++) {
+                if (entry == null){
+                    temp[i] = current[i];
+                    return;
+                }
+                else if(current[i] != null){
+                    duplicateCheck.contains(current[i][0]);
+                    if(duplicateCheck.contains(current[i][0])){
+                       System.out.println("DECLARATION ERROR " + current[i][0]);
+                       System.exit(1);
+                    }
+                    duplicateCheck.add(current[i][0]);
+                    temp[i] = current[i];
                 }
             }
-            context = context.decl();
+            temp[len] = entry;
+
+            table.replace(key, temp);
+        } else {
+            table.put(key, new String[][] { entry });
+        }
+    }
+
+    private void declHelper(String key, scannerParser.DeclContext context) {
+        if(context != null && context.decl() != null){
+            while (context.decl() != null) {
+                if (context.string_decl() != null) {
+                    scannerParser.String_declContext stringContext = context.string_decl();
+    
+                    String[] entry = { stringContext.id().IDENTIFIER().getText(), "STRING",
+                            stringContext.str().STRINGLITERAL().getText() };
+                    arrayHelper(key, entry);
+
+                } else if (context.var_decl() != null) {
+                    scannerParser.Var_declContext varContext = context.var_decl();
+                    String type = varContext.var_type().getText();
+                    scannerParser.Id_listContext list = varContext.id_list();
+    
+                    String[] entry = { list.id().IDENTIFIER().getText(), type };
+                    arrayHelper(key, entry);
+    
+                    scannerParser.Id_tailContext next = list.id_tail();
+    
+                    while (next.id_tail() != null) {
+                        entry = new String[] { next.id().IDENTIFIER().getText(), type };
+                        arrayHelper(key, entry);
+
+                        next = next.id_tail();
+                    }
+                }
+                context = context.decl();
+            }
+        }else{
+            arrayHelper(key, null);
         }
     }
 
     @Override
     public void enterFunc_decl(scannerParser.Func_declContext ctx) {
-        // stack.push(ctx.id().IDENTIFIER());
-        System.out.println(ctx.id().IDENTIFIER());
+        String key = ctx.id().IDENTIFIER().getText();
+        arrayHelper(key, null);
+    }
+
+    @Override
+    public void exitFunc_decl(scannerParser.Func_declContext ctx) {
+        String key = ctx.id().IDENTIFIER().getText();
 
         scannerParser.Param_decl_listContext list = ctx.param_decl_list();
 
-        if (list.param_decl() != null) {
-            scannerParser.Param_declContext parameter = list.param_decl();
+        if (list != null) {
+            if (list.param_decl() != null) {
+                scannerParser.Param_declContext parameter = list.param_decl();
 
-            System.out.println("name " + parameter.id().IDENTIFIER() + " type " + parameter.var_type().getText());
+                String[] entry = { parameter.id().IDENTIFIER().getText(), parameter.var_type().getText() };
+                arrayHelper(key, entry);
 
-            scannerParser.Param_decl_tailContext next = list.param_decl_tail();
+                scannerParser.Param_decl_tailContext next = list.param_decl_tail();
 
-            while (next.param_decl_tail() != null) {
-                System.out.println("name " + next.param_decl().id().IDENTIFIER() + " type "
-                        + next.param_decl().var_type().getText());
-                next = next.param_decl_tail();
+                while (next.param_decl_tail() != null) {
+                    entry = new String[] { next.param_decl().id().IDENTIFIER().getText(),
+                            next.param_decl().var_type().getText() };
+                    arrayHelper(key, entry);
+                    next = next.param_decl_tail();
+                }
             }
         }
-
-        declHelper(ctx.func_body().decl());
+        declHelper(key, ctx.func_body().decl());
     }
 
     @Override
     public void enterProgram(scannerParser.ProgramContext ctx) {
-        // stack.push("GLOBAL");
+        String key = "GLOBAL";
+        arrayHelper(key, null);
+    }
 
+    @Override
+    public void exitProgram(scannerParser.ProgramContext ctx) {
+        String key = "GLOBAL";
         scannerParser.DeclContext context = ctx.pgm_body().decl();
 
-        System.out.println("GLOBAL");
-
-        declHelper(context);
+        declHelper(key, context);
     }
 
+    // @Override
+    // public void enterIf_stmt(scannerParser.If_stmtContext ctx) {
+    //     blockNum++;
+
+    //     String key = "BLOCK " + blockNum;
+    //     arrayHelper(key, null);
+    // }
+
     @Override
-    public void enterIf_stmt(scannerParser.If_stmtContext ctx) {
+    public void exitIf_stmt(scannerParser.If_stmtContext ctx) {
         blockNum++;
+        String key = "BLOCK " + blockNum;
 
-        // stack.push("BLOCK " + blockNum);
-
-        System.out.println("Block " + blockNum);
-
-        declHelper(ctx.decl());
+        declHelper(key, ctx.decl());
     }
 
+    // @Override
+    // public void enterElse_part(scannerParser.Else_partContext ctx) {
+    //     blockNum++;
+    //     String key = "BLOCK " + blockNum;
+    //     arrayHelper(key, null);
+    // }
+
     @Override
-    public void enterElse_part(scannerParser.Else_partContext ctx) {
-        if (ctx.decl() != null) {
+    public void exitElse_part(scannerParser.Else_partContext ctx) {
+        if(ctx.decl() != null){
             blockNum++;
-
-            // stack.push("BLOCK " + blockNum);
-
-            System.out.println("Block " + blockNum);
-
-            declHelper(ctx.decl());
+            
+            String key = "BLOCK " + blockNum;
+            
+            declHelper(key, ctx.decl());
         }
     }
 
+    // @Override
+    // public void enterWhile_stmt(scannerParser.While_stmtContext ctx) {
+    //     blockNum++;
+
+    //     String key = "BLOCK " + blockNum;
+    //     arrayHelper(key, null);
+    // }
+
     @Override
-    public void enterWhile_stmt(scannerParser.While_stmtContext ctx) {
+    public void exitWhile_stmt(scannerParser.While_stmtContext ctx) {
         blockNum++;
+        
+        String key = "BLOCK " + blockNum;
 
-        // stack.push("BLOCK " + blockNum);
-
-        System.out.println("Block " + blockNum);
-
-        declHelper(ctx.decl());
+        declHelper(key, ctx.decl());
     }
 
-    public Hashtable<String, String[][]> getSymbolTable() {
+    public LinkedHashMap<String, String[][]> getSymbolTable() {
         return table;
     }
-
 }
