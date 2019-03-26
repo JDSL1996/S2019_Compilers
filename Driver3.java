@@ -23,16 +23,17 @@ public class Driver3 {
 
             parser.setErrorHandler(new BailErrorStrategy());
 
+            //make the listener
             Listener listener = new Listener();
+            //walk the parsetree using the listener
             new ParseTreeWalker().walk(listener, parser.program());
 
+            //get the table
             LinkedHashMap<String, String[][]> s = listener.getSymbolTable();
-            // Stack<String> stack = listener.getStack();
-
-            // while (stack.peek() != null) {
             String[] keySet = s.keySet().toArray(new String[0]);
+            
+            //pretty print out
             for (int x = 0 ; x<keySet.length ; x++){
-                // String key = stack.poll();
                 System.out.println("Symbol table " + keySet[x]);
                 for (String[] entry: s.get(keySet[x])) {
 
@@ -40,10 +41,12 @@ public class Driver3 {
                         for(int y = 0;y<entry.length;y++){
                             if(y == 0){
                                 System.out.print("name " + entry[y]);
-                            }else if(y==1){
+                            }
+                            else if(y==1){
                                 System.out.print(" type " + entry[y]);
                             }
                         }
+                        //if it has a value print it out (only strings)
                         if (entry.length == 3) {
                             System.out.print(" value " + entry[2]);
                         }
