@@ -10,5 +10,5 @@ file="$1"
 
 # this compiles and runs the grammer and the driver
 java -Xmx500M -cp "/usr/local/lib/antlr-4.7.2-complete.jar:$CLASSPATH" org.antlr.v4.Tool scanner.g4
-javac Driver2.java
-java Driver2 $file
+javac Driver3.java
+java Driver3 $file

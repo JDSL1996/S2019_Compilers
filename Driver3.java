@@ -1,9 +1,10 @@
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 import java.nio.file.*;
+import java.util.Hashtable;
 import java.io.*;
 
-public class Driver2 {
+public class Driver3 {
     public static void main(String[] args) {
         // read method to get the source code
         File f;
@@ -19,16 +20,22 @@ public class Driver2 {
             scannerParser parser = new scannerParser(cts);
 
             parser.setErrorHandler(new BailErrorStrategy());
-            try {
-                parser.program();
-                System.out.println("Accepted");
-            } catch (Exception e) {
-                System.out.println("Not accepted");
-            }
-            // always close
-            finally {
-                done = true;
-            }
+
+            Listener listener = new Listener();
+            new ParseTreeWalker().walk(listener, parser.program());
+
+            Hashtable s = listener.getSymbolTable();
+
+            // try {
+            // parser.program();
+            // System.out.println("Accepted");
+            // } catch (Exception e) {
+            // System.out.println("Not accepted");
+            // }
+            // // always close
+            // finally {
+            // done = true;
+            // }
         } catch (NullPointerException e) {
             System.out.println("No file found");
         } catch (FileNotFoundException fnfe) {
