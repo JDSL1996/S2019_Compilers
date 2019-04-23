@@ -3,12 +3,19 @@ import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.LinkedHashMap;
+import java.util.Stack;
 import java.util.HashSet;
 
 public class Listener extends scannerBaseListener {
-    ASTNode root = null;
-    LinkedHashMap<String, String[][]> table = new LinkedHashMap<String, String[][]>();
-    int blockNum = 0;
+    private ASTNode addop;
+    private ASTNode mulop;
+    private ASTNode leaf;
+    private ASTNode head;
+    private ASTNode currentOp;
+    private ASTNode currentTop;
+
+    private LinkedHashMap<String, String[][]> table = new LinkedHashMap<String, String[][]>();
+    private int blockNum = 0;
 
     // copies the old array into a temp array to be stored in the outer array in the
     // hashmap value matching the key
@@ -89,7 +96,76 @@ public class Listener extends scannerBaseListener {
         }
     }
 
-    // add the key on function entry
+    @Override
+    public void enterAddop(scannerParser.AddopContext ctx) {
+        if (addop != null) {
+            ASTNode temp = new ASTNode(ctx.getText());
+            currentTop = addop;
+            currentTop.setRight(temp);
+            temp.setLeft(leaf);
+            addop = null;
+        } else {
+            addop = new ASTNode(ctx.getText());
+            // System.out.print("addop: ");
+            // System.out.println(addop.getPay());
+            addop.setLeft(leaf);
+            currentTop = addop;
+        }
+    }
+
+    @Override
+    public void enterMulop(scannerParser.MulopContext ctx) {
+        if (mulop != null) {
+            ASTNode temp = new ASTNode(ctx.getText());
+            currentTop = mulop;
+            currentTop.setRight(temp);
+            temp.setLeft(leaf);
+            mulop = null;
+        } else {
+            mulop = new ASTNode(ctx.getText());
+            mulop.setLeft(leaf);
+            currentTop = mulop;
+        }
+    }
+
+    @Override
+    public void exitPostfix_expr(scannerParser.Postfix_exprContext ctx) {
+        ASTNode node = new ASTNode(null);
+        if (ctx.primary() != null) {
+            leaf = new ASTNode(ctx.primary().getText());
+            // System.out.println(leaf.getPay());
+
+            // subtree of single operation
+            if (addop != null) {
+                addop.setRight(leaf);
+            } else if (mulop != null) {
+                mulop.setRight(leaf);
+            }
+
+        }
+    }
+
+    @Override
+    public void enterAssign_expr(scannerParser.Assign_exprContext ctx) {
+        head = new ASTNode(":=");
+        head.setLeft(new ASTNode(ctx.id().getText()));
+
+    }
+
+    @Override
+    public void exitAssign_expr(scannerParser.Assign_exprContext ctx) {
+        if (currentTop != null) {
+            head.setRight(currentTop);
+            currentTop = null;
+        } else {
+            head.setRight(new ASTNode(ctx.expr().factor().postfix_expr().primary().getText()));
+        }
+        System.out.println(head.printLeftAndRight(1));
+        mulop = null;
+        addop = null;
+    }
+
+    // addop the key on function entry
     @Override
     public void enterFunc_decl(scannerParser.Func_declContext ctx) {
         String key = ctx.id().IDENTIFIER().getText();
