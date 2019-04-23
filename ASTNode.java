@@ -39,11 +39,11 @@ public class ASTNode {
         String line = "\n" + "  ".repeat(level) + "/~" + "\\\n";
         boolean children = false;
         if (left != null) {
-            line += left.getPay();
+            line += "  ".repeat(level) + left.getPay();
             children = true;
         }
         if (right != null) {
-            line += "    ".repeat(level) + right.getPay();
+            line += "   " + right.getPay();
             line += right.printLeftAndRight(level + 1);
             children = true;
         }

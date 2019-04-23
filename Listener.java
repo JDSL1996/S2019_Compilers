@@ -13,7 +13,6 @@ public class Listener extends scannerBaseListener {
     private ASTNode head;
     private ASTNode currentOp;
     private ASTNode currentTop;
-
     private LinkedHashMap<String, String[][]> table = new LinkedHashMap<String, String[][]>();
     private int blockNum = 0;
 
@@ -98,12 +97,11 @@ public class Listener extends scannerBaseListener {
 
     @Override
     public void enterAddop(scannerParser.AddopContext ctx) {
-        if (addop != null) {
+        if (currentTop != null) {
             ASTNode temp = new ASTNode(ctx.getText());
-            currentTop = addop;
-            currentTop.setRight(temp);
+            temp.setRight(currentTop);
             temp.setLeft(leaf);
-            addop = null;
+            currentTop = temp;
         } else {
             addop = new ASTNode(ctx.getText());
             // System.out.print("addop: ");
@@ -115,31 +113,37 @@ public class Listener extends scannerBaseListener {
 
     @Override
     public void enterMulop(scannerParser.MulopContext ctx) {
-        if (mulop != null) {
+        if (currentTop != null) {
             ASTNode temp = new ASTNode(ctx.getText());
-            currentTop = mulop;
-            currentTop.setRight(temp);
+            temp.setRight(currentTop);
             temp.setLeft(leaf);
-            mulop = null;
+            currentTop = temp;
         } else {
             mulop = new ASTNode(ctx.getText());
             mulop.setLeft(leaf);
             currentTop = mulop;
         }
     }
-
     @Override
-    public void exitPostfix_expr(scannerParser.Postfix_exprContext ctx) {
+    public void enterPostfix_expr(scannerParser.Postfix_exprContext ctx) {
         ASTNode node = new ASTNode(null);
         if (ctx.primary() != null) {
             leaf = new ASTNode(ctx.primary().getText());
-            // System.out.println(leaf.getPay());
+            //System.out.println(leaf.getPay());
+            boolean first = false;
+            if(addop != null){
+                first = true;
+                addop.setRight(leaf);
+                addop = null;
+            }else if(mulop != null){
+                first = true;
+                mulop.setRight(leaf);
+                mulop = null;
+            }
 
             // subtree of single operation
-            if (addop != null) {
-                addop.setRight(leaf);
-            } else if (mulop != null) {
-                mulop.setRight(leaf);
+            if (currentTop != null && !first) {
+                currentTop.setLeft(leaf);
             }
 
         }
@@ -149,7 +153,9 @@ public class Listener extends scannerBaseListener {
     public void enterAssign_expr(scannerParser.Assign_exprContext ctx) {
         head = new ASTNode(":=");
         head.setLeft(new ASTNode(ctx.id().getText()));
-
+        mulop = null;
+        addop = null;
+        currentTop = null;
     }
 
     @Override
@@ -161,8 +167,7 @@ public class Listener extends scannerBaseListener {
             head.setRight(new ASTNode(ctx.expr().factor().postfix_expr().primary().getText()));
         }
         System.out.println(head.printLeftAndRight(1));
-        mulop = null;
-        addop = null;
+
     }
 
     // addop the key on function entry
