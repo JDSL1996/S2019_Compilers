@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.util.LinkedHashMap;
 import java.util.Stack;
 import java.util.HashSet;
+import java.util.StringJoiner; 
 
 public class Listener extends scannerBaseListener {
     private ASTNode addop;
@@ -15,7 +16,8 @@ public class Listener extends scannerBaseListener {
     private ASTNode currentTop;
     private LinkedHashMap<String, String[][]> table = new LinkedHashMap<String, String[][]>();
     private int blockNum = 0;
-
+    public static int tempCount = 1;
+    private StringJoiner generated_code = new StringJoiner("\n");
     // copies the old array into a temp array to be stored in the outer array in the
     // hashmap value matching the key
     private void arrayHelper(String key, String[] entry) {
@@ -98,52 +100,71 @@ public class Listener extends scannerBaseListener {
     @Override
     public void enterAddop(scannerParser.AddopContext ctx) {
         if (currentTop != null) {
-            ASTNode temp = new ASTNode(ctx.getText());
+            ASTNode temp;
+            if(ctx.getText().equals("+")){
+                temp = new ASTNode(ctx.getText(), "ADDI");
+            }else{
+                temp = new ASTNode(ctx.getText(), "SUBI");
+            }
             temp.setRight(currentTop);
             temp.setLeft(leaf);
+            currentTop.setParent(temp);
             currentTop = temp;
         } else {
-            addop = new ASTNode(ctx.getText());
-            // System.out.print("addop: ");
-            // System.out.println(addop.getPay());
+            if(ctx.getText().equals("+")){
+                addop = new ASTNode(ctx.getText(), "ADDI");
+            }else{
+                addop = new ASTNode(ctx.getText(), "SUBI");
+            }
             addop.setLeft(leaf);
             currentTop = addop;
         }
     }
-
     @Override
     public void enterMulop(scannerParser.MulopContext ctx) {
         if (currentTop != null) {
-            ASTNode temp = new ASTNode(ctx.getText());
+            ASTNode temp;
+            if(ctx.getText().equals("*")){
+                temp = new ASTNode(ctx.getText(), "MULTI");
+            }else{
+                temp = new ASTNode(ctx.getText(), "DIVI");
+            }
             temp.setRight(currentTop);
             temp.setLeft(leaf);
+            currentTop.setParent(temp);
             currentTop = temp;
         } else {
-            mulop = new ASTNode(ctx.getText());
+            if(ctx.getText().equals("*")){
+                mulop = new ASTNode(ctx.getText(), "MULTI");
+            }else{
+                mulop = new ASTNode(ctx.getText(), "DIVI");
+            }
             mulop.setLeft(leaf);
             currentTop = mulop;
         }
     }
     @Override
     public void enterPostfix_expr(scannerParser.Postfix_exprContext ctx) {
-        ASTNode node = new ASTNode(null);
         if (ctx.primary() != null) {
-            leaf = new ASTNode(ctx.primary().getText());
+            leaf = new ASTNode(ctx.primary().getText(),"primary");
             //System.out.println(leaf.getPay());
             boolean first = false;
             if(addop != null){
                 first = true;
                 addop.setRight(leaf);
+                leaf.setParent(addop);
                 addop = null;
             }else if(mulop != null){
                 first = true;
                 mulop.setRight(leaf);
+                leaf.setParent(mulop);
                 mulop = null;
             }
 
             // subtree of single operation
             if (currentTop != null && !first) {
                 currentTop.setLeft(leaf);
+                leaf.setParent(currentTop);
             }
 
         }
@@ -151,25 +172,69 @@ public class Listener extends scannerBaseListener {
 
     @Override
     public void enterAssign_expr(scannerParser.Assign_exprContext ctx) {
-        head = new ASTNode(":=");
-        head.setLeft(new ASTNode(ctx.id().getText()));
+        head = new ASTNode(":=","assignment");
+        head.setLeft(new ASTNode(ctx.id().getText(),"primary"));
         mulop = null;
         addop = null;
         currentTop = null;
     }
 
     @Override
+    public void exitWrite_stmt(scannerParser.Write_stmtContext ctx){
+        String[] split = ctx.id_list().getText().split(",");
+        if(split.length == 1){
+            generated_code.add("WRITEI " + split[0]);
+        }else{
+            generated_code.add("WRITEI " + split[0] + "\nWRITES " + split[1]);        
+        }
+    }
+    @Override
+    public void exitRead_stmt(scannerParser.Read_stmtContext ctx){
+        String[] split = ctx.id_list().getText().split(",");
+        generated_code.add("READI " + split[0]);
+    }
+    @Override
     public void exitAssign_expr(scannerParser.Assign_exprContext ctx) {
         if (currentTop != null) {
             head.setRight(currentTop);
+            currentTop.setParent(head);
             currentTop = null;
         } else {
-            head.setRight(new ASTNode(ctx.expr().factor().postfix_expr().primary().getText()));
+            ASTNode temp = new ASTNode(ctx.expr().factor().postfix_expr().primary().getText(),"primary");
+            head.setRight(temp);
+            temp.setParent(head);
         }
-        System.out.println(head.printLeftAndRight(1));
-
+        //System.out.println(head.printLeftAndRight(1));
+        generated_code.add(generateCode());
     }
-
+    public String generateCode(){
+        ASTNode temp_node = head;
+        //Go to the bottom right
+        while(temp_node.getRight()!= null){
+            temp_node = temp_node.getRight();
+        }
+        StringJoiner sj = new StringJoiner("\n");
+        String prevTemp = null;
+        while(temp_node.getParent() != null){
+            ASTNode op = temp_node.getParent();
+            if(prevTemp != null){
+                op.setOP1(prevTemp, "TEMP");
+                op.setOP2(op.getLeft().getPay(), op.getLeft().getInstruction());
+            }else{
+                op.setOP1(op.getLeft().getPay(), op.getLeft().getInstruction());
+                op.setOP2(temp_node.getPay(), temp_node.getInstruction());
+            }
+            op.setResult("$T" + tempCount);
+            prevTemp = "$T" + tempCount;
+            sj.add(op.generateCode());
+            temp_node = temp_node.getParent();
+            if(temp_node.getParent() != null){
+                tempCount++;
+            }
+        }
+        return sj.toString();
+        
+    }
     // addop the key on function entry
     @Override
     public void enterFunc_decl(scannerParser.Func_declContext ctx) {
@@ -212,11 +277,71 @@ public class Listener extends scannerBaseListener {
     }
 
     // add the values to the key on program exit
-    @Override
+    @Override 
     public void exitProgram(scannerParser.ProgramContext ctx) {
         String key = "GLOBAL";
         scannerParser.DeclContext context = ctx.pgm_body().decl();
-
+        String[] lines = generated_code.toString().split("\n");
+        StringJoiner sj = new StringJoiner("\n");
+        for(String line : lines){
+            String[] split = line.split(" ");
+            if(split.length > 1){
+                if(split[0].equals("STOREI")){
+                    split[0] = "move";
+                }
+                if(split[1].substring(0,1).equals("$")){
+                    split[1] = "r" + (Integer.parseInt(split[1].substring(2))-1);
+                }
+                if(split[0].equals("READI")){
+                    split[0] = "sys readi";
+                }
+            }
+            //;WRITEI e
+            //;WRITES newline
+            
+            //sys writei c
+            //sys writes newline
+            if(split.length == 2){
+                if(split[0].equals("WRITEI")){
+                    split[0] = "sys writei";
+                }else if(split[0].equals("WRITES")){
+                    split[0] = "sys writes";
+                }
+            }
+            if(split.length > 2){
+                
+                if(split[2].substring(0,1).equals("$")){
+                    split[2] = "r" + (Integer.parseInt(split[2].substring(2))-1);
+                }
+            }
+            if(split.length > 3){
+                if(split[3].substring(0,1).equals("$")){
+                    split[3] = "r" + (Integer.parseInt(split[3].substring(2))-1);
+                }else{
+                    //TODO: grab variable name and add to a hash list
+                }
+                if(split[0].equals("ADDI")){
+                    String[] tempSplit = new String[1];
+                    tempSplit[0] = "move " + split[1] + " " + split[3] + "\naddi " + split[2] + " " + split[3];
+                    split = tempSplit;
+                }else if(split[0].equals("SUBI")){
+                    String[] tempSplit = new String[1];
+                    tempSplit[0] = "move " + split[1] + " " + split[3] + "\nsubi " + split[2] + " " + split[3];
+                    split = tempSplit;
+                }else if(split[0].equals("MULTI")){
+                    String[] tempSplit = new String[1];
+                    tempSplit[0] = "move " + split[1] + " " + split[3] + "\nmuli " + split[2] + " " + split[3];
+                    split = tempSplit;
+                }else if(split[0].equals("DIVI")){
+                    String[] tempSplit = new String[1];
+                    tempSplit[0] = "move " + split[1] + " " + split[3] + "\ndivi " + split[2] + " " + split[3];
+                    split = tempSplit;
+                }
+            }
+            sj.add(String.join(" ",split));
+        }
+        //System.out.println(generated_code.toString());
+        System.out.println(sj.toString());
         declHelper(key, context);
     }
 
