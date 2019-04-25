@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Stack;
 import java.util.HashSet;
 import java.util.StringJoiner; 
-
+import java.util.HashSet;
 public class Listener extends scannerBaseListener {
     private ASTNode addop;
     private ASTNode mulop;
@@ -18,6 +18,7 @@ public class Listener extends scannerBaseListener {
     private int blockNum = 0;
     public static int tempCount = 1;
     private StringJoiner generated_code = new StringJoiner("\n");
+    private HashSet<String> variables = new HashSet<>();
     // copies the old array into a temp array to be stored in the outer array in the
     // hashmap value matching the key
     private void arrayHelper(String key, String[] entry) {
@@ -26,7 +27,7 @@ public class Listener extends scannerBaseListener {
         if (current != null) {
             int len = current.length;
             String[][] temp = new String[len + 1][];
-            HashSet<String> duplicateCheck = new HashSet<>();
+            variables = new HashSet<>();
             // copy the array
             for (int i = 0; i < len; i++) {
                 if (entry == null) {
@@ -35,16 +36,17 @@ public class Listener extends scannerBaseListener {
                 }
                 // if this location has information check for matching names
                 else if (current[i] != null) {
-                    duplicateCheck.contains(current[i][0]);
-                    if (duplicateCheck.contains(current[i][0])) {
+                    variables.contains(current[i][0]);
+                    if (variables.contains(current[i][0])) {
                         // if a match is found throw an error and end
                         System.out.println("DECLARATION ERROR " + current[i][0]);
                         System.exit(1);
                     }
-                    duplicateCheck.add(current[i][0]);
+                    variables.add(current[i][0]);
                     temp[i] = current[i];
                 }
             }
+            
             // add the new entry
             temp[len] = entry;
 
@@ -84,7 +86,6 @@ public class Listener extends scannerBaseListener {
                     while (next.id_tail() != null) {
                         entry = new String[] { next.id().IDENTIFIER().getText(), type };
                         arrayHelper(key, entry);
-
                         next = next.id_tail();
                     }
                 }
@@ -204,7 +205,7 @@ public class Listener extends scannerBaseListener {
             head.setRight(temp);
             temp.setParent(head);
         }
-        //System.out.println(head.printLeftAndRight(1));
+        System.out.println(head.printLeftAndRight(1));
         generated_code.add(generateCode());
     }
     public String generateCode(){
@@ -317,8 +318,6 @@ public class Listener extends scannerBaseListener {
             if(split.length > 3){
                 if(split[3].substring(0,1).equals("$")){
                     split[3] = "r" + (Integer.parseInt(split[3].substring(2))-1);
-                }else{
-                    //TODO: grab variable name and add to a hash list
                 }
                 if(split[0].equals("ADDI")){
                     String[] tempSplit = new String[1];
@@ -340,9 +339,14 @@ public class Listener extends scannerBaseListener {
             }
             sj.add(String.join(" ",split));
         }
+        sj.add("sys halt\n");
         //System.out.println(generated_code.toString());
-        System.out.println(sj.toString());
         declHelper(key, context);
+        for(String variable : variables){
+             System.out.println("var " + variable);
+        }
+        System.out.println("str newline \"\\n\"");
+        System.out.println(sj.toString());
     }
 
     // add the key and values on if exit
