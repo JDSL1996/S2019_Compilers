@@ -1,44 +1,35 @@
-var p
 var a
-var b
-var u
-var g
-var k
+var num
+var i
 str newline "\n"
-move 1 r0
-move r0 a
-move 1 r1
-move r1 b
-move 1 r2
-muli a r2
-move g r3
-move r3 r2
-sys writei g
-sys writes newline
-move 2 r4
-muli a r4
-move p r5
-move r5 r4
-sys writei p
-sys writes newline
-move 3 r6
-muli a r6
-move k r7
-move r7 r6
-sys writei k
-sys writes newline
-move 4 r8
-muli a r8
-move u r9
-move r9 r8
-sys writei u
-sys writes newline
-move b r10
-addi 1 r10
-move b r11
-move r11 r10
-move a r12
-addi 20 r12
-move a r13
-move r13 r12
+label main
+move 7 r0
+move r0 num
+move 2 r1
+move r1 i
+move 42 r2
+move r2 a
+move 5 r10
+cmpi i r10
+jge else_0
+move 5 r11
+cmpi i r11
+jge if_0
+move num r3
+addi a r3
+move r3 num
+move 3 r12
+cmpi i r12
+jge if_1
+move num r5
+addi a r5
+move r5 num
+label if_1
+jmp if_0
+label else_0
+move num r7
+subi a r7
+move r7 num
+label if_0
+sys writei num
 sys halt

@@ -7,6 +7,7 @@ import java.util.Stack;
 import java.util.HashSet;
 import java.util.StringJoiner; 
 import java.util.HashSet;
+import java.util.ArrayList;
 public class Listener extends scannerBaseListener {
     private ASTNode addop;
     private ASTNode mulop;
@@ -16,10 +17,21 @@ public class Listener extends scannerBaseListener {
     private ASTNode currentTop;
     private ASTNode currentIF;
     private LinkedHashMap<String, String[][]> table = new LinkedHashMap<String, String[][]>();
+    private ArrayList<String> while_start_tracker = new ArrayList();
+    private ArrayList<String> while_end_tracker = new ArrayList();
+    private ArrayList<String> if_start_tracker = new ArrayList();
+    private ArrayList<String> if_end_tracker = new ArrayList();
+    private ArrayList<String> else_tracker = new ArrayList();
+    private ArrayList<Boolean> if_else_tracker = new ArrayList();//If else is present
+    private ArrayList<Boolean> if_if_else_tracker = new ArrayList();//If else is present, for if tracking
+    private int ifNum = 0;
     private int blockNum = 0;
+    private int whileNum = 0;
+    private int elseNum = 0;
     public static int tempCount = 1;
     private StringJoiner generated_code = new StringJoiner("\n");
     private HashSet<String> variables = new HashSet<>();
+    private HashSet<String> used_variables = new HashSet<>();
     // copies the old array into a temp array to be stored in the outer array in the
     // hashmap value matching the key
     private void arrayHelper(String key, String[] entry) {
@@ -37,17 +49,19 @@ public class Listener extends scannerBaseListener {
                 }
                 // if this location has information check for matching names
                 else if (current[i] != null) {
-                    variables.contains(current[i][0]);
                     if (variables.contains(current[i][0])) {
                         // if a match is found throw an error and end
                         System.out.println("DECLARATION ERROR " + current[i][0]);
                         System.exit(1);
+                    }else{
+                        System.out.println(current[i][0]);
+
                     }
                     variables.add(current[i][0]);
                     temp[i] = current[i];
                 }
             }
-            
+            variables.clear();
             // add the new entry
             temp[len] = entry;
 
@@ -69,7 +83,7 @@ public class Listener extends scannerBaseListener {
                     scannerParser.String_declContext stringContext = context.string_decl();
 
                     String[] entry = {stringContext.id().IDENTIFIER().getText(), "STRING",
-                            stringContext.str().STRINGLITERAL().getText()};
+                    stringContext.str().STRINGLITERAL().getText()};
                     arrayHelper(key, entry);
 
                 }
@@ -121,12 +135,32 @@ public class Listener extends scannerBaseListener {
         }else if(operator.equals("!=")){
             operator = "EQ";
         }
-        generated_code.add(operator + " " + OP1 + " " + OP2 + " " + "LABEL" + blockNum);
+        if(ctx.else_part() != null){
+            if(!ctx.else_part().getText().equals("")){
+                if_else_tracker.add(true);
+                if_if_else_tracker.add(true);
+                else_tracker.add("else_" + elseNum);
+                if_start_tracker.add("if_" + ifNum);
+                if_end_tracker.add("if_" + ifNum);
+                generated_code.add(operator + " " + OP1 + " " + OP2 + " " + "else_" + elseNum);
+                generated_code.add(operator + " " + OP1 + " " + OP2 + " " + "if_" + ifNum);
+                ifNum++;
+                elseNum++;
+            }else{
+                if_if_else_tracker.add(false);
+                if_start_tracker.add("if_" + ifNum);
+                if_else_tracker.add(false);
+                generated_code.add(operator + " " + OP1 + " " + OP2 + " " + "if_" + ifNum);
+                ifNum++;
+            }
+        }
+        blockNum++;
     }
     @Override
     public void enterElse_part(scannerParser.Else_partContext ctx) {
-        if (ctx.decl() != null){
-            generated_code.add("LABEL" + blockNum);
+        if(if_else_tracker.remove(if_else_tracker.size()-1)){
+            generated_code.add("jmp " + if_end_tracker.remove(if_end_tracker.size()-1));
+            generated_code.add("label " + else_tracker.remove(else_tracker.size()-1));
         }
     }
     @Override
@@ -135,25 +169,32 @@ public class Listener extends scannerBaseListener {
         String[] ops = ctx.cond().getText().split(operator);
         String OP1 = ops[0];
         String OP2 = ops[1];
+        //Inverse logic because we are deciding when to jump
         if(operator.equals("=")){
-            operator = "EQ";
-        }else if(operator.equals(">")){
-            operator = "GT";
-        }else if(operator.equals(">=")){
-            operator = "GE";
-        }else if(operator.equals("<")){
-            operator = "LT";
-        }else if(operator.equals("<=")){
-            operator = "LE";
-        }else if(operator.equals("!=")){
             operator = "NE";
+        }else if(operator.equals(">")){
+            operator = "LE";
+        }else if(operator.equals(">=")){
+            operator = "LT";
+        }else if(operator.equals("<")){
+            operator = "GE";
+        }else if(operator.equals("<=")){
+            operator = "GT";
+        }else if(operator.equals("!=")){
+            operator = "EQ";
         }
+        while_start_tracker.add("while_start_" + blockNum);
+        generated_code.add("label while_start_" + blockNum);
+        while_end_tracker.add("while_" + whileNum);
+        generated_code.add(operator + " " + OP1 + " " + OP2 + " " + "while_" + whileNum);
+        whileNum++;
+        blockNum++;
     }
     //exit statements
     // add the key and values on if exit
     @Override
     public void exitIf_stmt(scannerParser.If_stmtContext ctx) {
-        generated_code.add("LABEL" + blockNum);
+        generated_code.add("label " + if_start_tracker.remove(if_start_tracker.size() - 1));
         blockNum++;
         //System.out.println("END IF");
         String key = "BLOCK " + blockNum;
@@ -175,8 +216,9 @@ public class Listener extends scannerBaseListener {
     // add the key and values on while exit
     @Override
     public void exitWhile_stmt(scannerParser.While_stmtContext ctx) {
+        generated_code.add("jmp " + while_start_tracker.remove(while_start_tracker.size()-1));
+        generated_code.add("label " + while_end_tracker.remove(while_end_tracker.size()-1));
         blockNum++;
-
         String key = "BLOCK " + blockNum;
 
         declHelper(key, ctx.decl());
@@ -260,6 +302,9 @@ public class Listener extends scannerBaseListener {
     public void enterAssign_expr(scannerParser.Assign_exprContext ctx) {
         head = new ASTNode(":=","assignment");
         head.setLeft(new ASTNode(ctx.id().getText(),"primary"));
+        if(!used_variables.contains(ctx.id().getText())){
+            used_variables.add(ctx.id().getText());
+        }
         mulop = null;
         addop = null;
         currentTop = null;
@@ -277,7 +322,13 @@ public class Listener extends scannerBaseListener {
     @Override
     public void exitRead_stmt(scannerParser.Read_stmtContext ctx){
         String[] split = ctx.id_list().getText().split(",");
-        generated_code.add("READI " + split[0]);
+        if(split.length >= 1){
+            generated_code.add("READI " + split[0]);
+        }
+        if(split.length >= 2){
+            generated_code.add("READI " + split[1]);
+        }
+
     }
     @Override
     public void exitAssign_expr(scannerParser.Assign_exprContext ctx) {
@@ -415,18 +466,69 @@ public class Listener extends scannerBaseListener {
                     String[] tempSplit = new String[1];
                     tempSplit[0] = "move " + split[1] + " " + split[3] + "\ndivi " + split[2] + " " + split[3];
                     split = tempSplit;
+                }else if(split[0].equals("NE")){
+                    //NE b 3 else_0
+                    String r_alloc = "move " + split[2] + " r" + tempCount;
+                    String comp = "cmpi " + split[1] + " r" + tempCount;
+                    String jmp = "jne " + split[3];
+                    tempCount++;
+                    String tempSplit[] = new String[1];
+                    tempSplit[0] = r_alloc + "\n" + comp + "\n" + jmp;
+                    split = tempSplit;
+                }else if(split[0].equals("LT")) {
+                    String r_alloc = "move " + split[2] + " r" + tempCount;
+                    String comp = "cmpi " + split[1] + " r" + tempCount;
+                    String jmp = "jlt " + split[3];
+                    tempCount++;
+                    String tempSplit[] = new String[1];
+                    tempSplit[0] = r_alloc + "\n" + comp + "\n" + jmp;
+                    split = tempSplit;
+                }else if(split[0].equals("LE")){
+                    String r_alloc = "move " + split[2] + " r" + tempCount;
+                    String comp = "cmpi " + split[1] + " r" + tempCount;
+                    String jmp = "jle " + split[3];
+                    tempCount++;
+                    String tempSplit[] = new String[1];
+                    tempSplit[0] = r_alloc + "\n" + comp + "\n" + jmp;
+                    split = tempSplit;
+                }else if(split[0].equals("GT")){
+                    String r_alloc = "move " + split[2] + " r" + tempCount;
+                    String comp = "cmpi " + split[1] + " r" + tempCount;
+                    String jmp = "jgt " + split[3];
+                    tempCount++;
+                    String tempSplit[] = new String[1];
+                    tempSplit[0] = r_alloc + "\n" + comp + "\n" + jmp;
+                    split = tempSplit;
+                }else if(split[0].equals("GE")){
+                    String r_alloc = "move " + split[2] + " r" + tempCount;
+                    String comp = "cmpi " + split[1] + " r" + tempCount;
+                    String jmp = "jge " + split[3];
+                    tempCount++;
+                    String tempSplit[] = new String[1];
+                    tempSplit[0] = r_alloc + "\n" + comp + "\n" + jmp;
+                    split = tempSplit;
+                }else if(split[0].equals("EQ")){
+                    String r_alloc = "move " + split[2] + " r" + tempCount;
+                    String comp = "cmpi " + split[1] + " r" + tempCount;
+                    String jmp = "jeq " + split[3];
+                    tempCount++;
+                    String tempSplit[] = new String[1];
+                    tempSplit[0] = r_alloc + "\n" + comp + "\n" + jmp;
+                    split = tempSplit;
                 }
             }
             sj.add(String.join(" ",split));
         }
         sj.add("sys halt\n");
         System.out.println(generated_code.toString());
-        declHelper(key, context);
-        for(String variable : variables){
-             System.out.println("var " + variable);
+
+        for(String variable : used_variables) {
+            System.out.println("var " + variable);
         }
         System.out.println("str newline \"\\n\"");
+        System.out.println("label main");
         System.out.println(sj.toString());
+        declHelper(key, context);
     }
     // return the table
     public LinkedHashMap<String, String[][]> getSymbolTable() {

@@ -40,10 +40,17 @@ public class ASTNode {
     public String generateCode(){
         if(instruction.equals("assignment")){
             if(opType2.equals("primary")){
-                String first = String.join(" ","STOREI",op2,temp);
-                String second = String.join(" ","STOREI",temp,op1);
+                String first;
+                String second;
+                if(op1.substring(0,1).equals("$")){
+                    first = "";
+                    second = String.join(" ","STOREI",op1,op2);
+                }else{
+                    first = String.join(" ","STOREI",op2,temp) + "\n";
+                    second = String.join(" ","STOREI",temp,op1);
+                }
                 Listener.tempCount++;
-                return first + "\n" + second; 
+                return first + second;
             }else{
                 String first = String.join(" ","STOREI",temp,op1);
                 Listener.tempCount++;
