@@ -28,6 +28,5 @@ BEGIN
 			b := b + 1;
 			a := a + 20;
 		ENDWHILE
-
 	END
 END

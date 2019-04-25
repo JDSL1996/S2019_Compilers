@@ -107,6 +107,34 @@ public class Listener extends scannerBaseListener {
         String[] ops = ctx.cond().getText().split(operator);
         String OP1 = ops[0];
         String OP2 = ops[1];
+        //Inverse logic because we are deciding when to jump
+        if(operator.equals("=")){
+            operator = "NE";
+        }else if(operator.equals(">")){
+            operator = "LE";
+        }else if(operator.equals(">=")){
+            operator = "LT";
+        }else if(operator.equals("<")){
+            operator = "GE";
+        }else if(operator.equals("<=")){
+            operator = "GT";
+        }else if(operator.equals("!=")){
+            operator = "EQ";
+        }
+        generated_code.add(operator + " " + OP1 + " " + OP2 + " " + "LABEL" + blockNum);
+    }
+    @Override
+    public void enterElse_part(scannerParser.Else_partContext ctx) {
+        if (ctx.decl() != null){
+            generated_code.add("LABEL" + blockNum);
+        }
+    }
+    @Override
+    public void enterWhile_stmt(scannerParser.While_stmtContext ctx) {
+        String operator = ctx.cond().compop().getText();
+        String[] ops = ctx.cond().getText().split(operator);
+        String OP1 = ops[0];
+        String OP2 = ops[1];
         if(operator.equals("=")){
             operator = "EQ";
         }else if(operator.equals(">")){
@@ -120,19 +148,14 @@ public class Listener extends scannerBaseListener {
         }else if(operator.equals("!=")){
             operator = "NE";
         }
-        generated_code.add(operator + " " + OP1 + " " + OP2 + " " + "LABEL" + blockNum);
     }
-    @Override
-    public void enterElse_part(scannerParser.Else_partContext ctx) {
-        System.out.println("ELSE: ");
-    }
-
     //exit statements
     // add the key and values on if exit
     @Override
     public void exitIf_stmt(scannerParser.If_stmtContext ctx) {
+        generated_code.add("LABEL" + blockNum);
         blockNum++;
-        System.out.println("END IF");
+        //System.out.println("END IF");
         String key = "BLOCK " + blockNum;
 
         declHelper(key, ctx.decl());
@@ -141,17 +164,26 @@ public class Listener extends scannerBaseListener {
     // add the key and values on else exit if there is an else
     @Override
     public void exitElse_part(scannerParser.Else_partContext ctx) {
-        System.out.println("END ELSE");
         if (ctx.decl() != null) {
-            blockNum++;
 
+            blockNum++;
             String key = "BLOCK " + blockNum;
 
             declHelper(key, ctx.decl());
         }
     }
+    // add the key and values on while exit
+    @Override
+    public void exitWhile_stmt(scannerParser.While_stmtContext ctx) {
+        blockNum++;
 
-//=================================================End of: CONDITIONALS=================================================
+        String key = "BLOCK " + blockNum;
+
+        declHelper(key, ctx.decl());
+    }
+
+
+    //=================================================End of: CONDITIONALS=================================================
     @Override
     public void enterAddop(scannerParser.AddopContext ctx) {
         if (currentTop != null) {
@@ -396,17 +428,6 @@ public class Listener extends scannerBaseListener {
         System.out.println("str newline \"\\n\"");
         System.out.println(sj.toString());
     }
-
-    // add the key and values on while exit
-    @Override
-    public void exitWhile_stmt(scannerParser.While_stmtContext ctx) {
-        blockNum++;
-
-        String key = "BLOCK " + blockNum;
-
-        declHelper(key, ctx.decl());
-    }
-
     // return the table
     public LinkedHashMap<String, String[][]> getSymbolTable() {
         return table;
