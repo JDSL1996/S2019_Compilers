@@ -14,6 +14,7 @@ public class Listener extends scannerBaseListener {
     private ASTNode head;
     private ASTNode currentOp;
     private ASTNode currentTop;
+    private ASTNode currentIF;
     private LinkedHashMap<String, String[][]> table = new LinkedHashMap<String, String[][]>();
     private int blockNum = 0;
     public static int tempCount = 1;
@@ -67,8 +68,8 @@ public class Listener extends scannerBaseListener {
                 if (context.string_decl() != null) {
                     scannerParser.String_declContext stringContext = context.string_decl();
 
-                    String[] entry = { stringContext.id().IDENTIFIER().getText(), "STRING",
-                            stringContext.str().STRINGLITERAL().getText() };
+                    String[] entry = {stringContext.id().IDENTIFIER().getText(), "STRING",
+                            stringContext.str().STRINGLITERAL().getText()};
                     arrayHelper(key, entry);
 
                 }
@@ -78,13 +79,13 @@ public class Listener extends scannerBaseListener {
                     String type = varContext.var_type().getText();
                     scannerParser.Id_listContext list = varContext.id_list();
 
-                    String[] entry = { list.id().IDENTIFIER().getText(), type };
+                    String[] entry = {list.id().IDENTIFIER().getText(), type};
                     arrayHelper(key, entry);
 
                     scannerParser.Id_tailContext next = list.id_tail();
 
                     while (next.id_tail() != null) {
-                        entry = new String[] { next.id().IDENTIFIER().getText(), type };
+                        entry = new String[]{next.id().IDENTIFIER().getText(), type};
                         arrayHelper(key, entry);
                         next = next.id_tail();
                     }
@@ -97,7 +98,60 @@ public class Listener extends scannerBaseListener {
             arrayHelper(key, null);
         }
     }
+//=====================================================CONDITIONALS=====================================================
+    //Enter statements
 
+    @Override
+    public void enterIf_stmt(scannerParser.If_stmtContext ctx) {
+        String operator = ctx.cond().compop().getText();
+        String[] ops = ctx.cond().getText().split(operator);
+        String OP1 = ops[0];
+        String OP2 = ops[1];
+        if(operator.equals("=")){
+            operator = "EQ";
+        }else if(operator.equals(">")){
+            operator = "GT";
+        }else if(operator.equals(">=")){
+            operator = "GE";
+        }else if(operator.equals("<")){
+            operator = "LT";
+        }else if(operator.equals("<=")){
+            operator = "LE";
+        }else if(operator.equals("!=")){
+            operator = "NE";
+        }
+        generated_code.add(operator + " " + OP1 + " " + OP2 + " " + "LABEL" + blockNum);
+    }
+    @Override
+    public void enterElse_part(scannerParser.Else_partContext ctx) {
+        System.out.println("ELSE: ");
+    }
+
+    //exit statements
+    // add the key and values on if exit
+    @Override
+    public void exitIf_stmt(scannerParser.If_stmtContext ctx) {
+        blockNum++;
+        System.out.println("END IF");
+        String key = "BLOCK " + blockNum;
+
+        declHelper(key, ctx.decl());
+    }
+
+    // add the key and values on else exit if there is an else
+    @Override
+    public void exitElse_part(scannerParser.Else_partContext ctx) {
+        System.out.println("END ELSE");
+        if (ctx.decl() != null) {
+            blockNum++;
+
+            String key = "BLOCK " + blockNum;
+
+            declHelper(key, ctx.decl());
+        }
+    }
+
+//=================================================End of: CONDITIONALS=================================================
     @Override
     public void enterAddop(scannerParser.AddopContext ctx) {
         if (currentTop != null) {
@@ -161,7 +215,6 @@ public class Listener extends scannerBaseListener {
                 leaf.setParent(mulop);
                 mulop = null;
             }
-
             // subtree of single operation
             if (currentTop != null && !first) {
                 currentTop.setLeft(leaf);
@@ -297,11 +350,6 @@ public class Listener extends scannerBaseListener {
                     split[0] = "sys readi";
                 }
             }
-            //;WRITEI e
-            //;WRITES newline
-            
-            //sys writei c
-            //sys writes newline
             if(split.length == 2){
                 if(split[0].equals("WRITEI")){
                     split[0] = "sys writei";
@@ -340,34 +388,13 @@ public class Listener extends scannerBaseListener {
             sj.add(String.join(" ",split));
         }
         sj.add("sys halt\n");
-        //System.out.println(generated_code.toString());
+        System.out.println(generated_code.toString());
         declHelper(key, context);
         for(String variable : variables){
              System.out.println("var " + variable);
         }
         System.out.println("str newline \"\\n\"");
         System.out.println(sj.toString());
-    }
-
-    // add the key and values on if exit
-    @Override
-    public void exitIf_stmt(scannerParser.If_stmtContext ctx) {
-        blockNum++;
-        String key = "BLOCK " + blockNum;
-
-        declHelper(key, ctx.decl());
-    }
-
-    // add the key and values on else exit if there is an else
-    @Override
-    public void exitElse_part(scannerParser.Else_partContext ctx) {
-        if (ctx.decl() != null) {
-            blockNum++;
-
-            String key = "BLOCK " + blockNum;
-
-            declHelper(key, ctx.decl());
-        }
     }
 
     // add the key and values on while exit
