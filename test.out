@@ -1,35 +1,70 @@
+var p
 var a
-var num
-var i
+var b
+var u
+var g
+var k
 str newline "\n"
 label main
-move 7 r0
-move r0 num
-move 2 r1
-move r1 i
-move 42 r2
-move r2 a
-move 5 r10
-cmpi i r10
-jge else_0
-move 5 r11
-cmpi i r11
-jge if_0
-move num r3
-addi a r3
-move r3 num
-move 3 r12
-cmpi i r12
-jge if_1
-move num r5
-addi a r5
-move r5 num
-label if_1
-jmp if_0
-label else_0
-move num r7
-subi a r7
-move r7 num
+;Creating new temp
+move 1 r3
+move r3 a
+;Creating new temp
+move 1 r7
+move r7 b
+label while_start_0
+move 80 r45
+cmpi a r45
+jgt while_0
+move 1 r46
+cmpi b r46
+jne if_0
+move 1 r11
+muli a r11
+;using previous temp
+move r11 g
+sys writei g
+sys writes newline
 label if_0
-sys writei num
+move 2 r47
+cmpi b r47
+jne if_1
+move 2 r17
+muli a r17
+;using previous temp
+move r17 p
+sys writei p
+sys writes newline
+label if_1
+move 3 r48
+cmpi b r48
+jne else_0
+move 3 r49
+cmpi b r49
+jne if_2
+move 3 r23
+muli a r23
+;using previous temp
+move r23 k
+sys writei k
+sys writes newline
+jmp if_2
+label else_0
+move 4 r29
+muli a r29
+;using previous temp
+move r29 u
+sys writei u
+sys writes newline
+label if_2
+move b r35
+addi 1 r35
+;using previous temp
+move r35 b
+move a r41
+addi 20 r41
+;using previous temp
+move r41 a
+jmp while_start_0
+label while_0
 sys halt

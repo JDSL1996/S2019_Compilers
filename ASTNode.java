@@ -31,7 +31,7 @@ public class ASTNode {
         if(instruction.equals("primary")){
             return payload;
         }else{
-            return null;//code[3]
+            return temp;//code[3]
         }
     }
     public String getInstruction(){
@@ -39,28 +39,18 @@ public class ASTNode {
     }
     public String generateCode(){
         if(instruction.equals("assignment")){
-            if(opType2.equals("primary")){
+            if(opType1.equals("primary")){
                 String first;
                 String second;
-                if(op1.substring(0,1).equals("$")){
-                    first = "";
-                    second = String.join(" ","STOREI",op1,op2);
-                }else{
-                    first = String.join(" ","STOREI",op2,temp) + "\n";
-                    second = String.join(" ","STOREI",temp,op1);
-                }
-                Listener.tempCount++;
+                first = String.join(" ","STOREI",op2,temp) + "\n";
+                second = String.join(" ","STOREI",temp,op1);
                 return first + second;
             }else{
-                String first = String.join(" ","STOREI",temp,op1);
-                Listener.tempCount++;
-                return first;
+                return "STOREI " + op1 + " " + op2;
             }
-            
         }else{
             return String.join(" ",instruction,op1,op2,temp);
         }
-        
     }
     public void setPayload(String inPay) {
         payload = inPay;
@@ -100,6 +90,7 @@ public class ASTNode {
         boolean children = false;
         if (left != null) {
             line += "  ".repeat(level) + left.getPay();
+            line += left.printLeftAndRight(level + 1);
             children = true;
         }
         if (right != null) {
