@@ -217,19 +217,12 @@ public class Listener extends scannerBaseListener {
         assignment.setLeft(left);
         if(l_r[1].length() > 0){
             ArrayList<String> postfix = infixToPostfix(l_r[1]);
-//            for(String k: postfix){
-//                System.out.print(k + ",");
-//            }
             ASTNode root;
             root = evaluatePostfix(postfix);
 
             while(root.getParent() != null){
                 root = root.getParent();
             }
-//            System.out.println("NEW TREE");
-//            System.out.println(root.printLeftAndRight(1));
-//            System.out.println("TREE END");
-
             assignment.setRight(root);
             if(root.getType().equals("float")){
                 variable_to_type.put(l_r[0],"float");
@@ -341,7 +334,6 @@ public class Listener extends scannerBaseListener {
         for(int i=0;i<exp.size();i++)
         {
             String chunk = exp.get(i);
-            System.out.println(chunk);
             // If the scanned character is an operand (number here),
             // push it to the stack.
             if(!(chunk.substring(0,1).equals("+") || chunk.substring(0,1).equals("-") || chunk.substring(0,1).equals("*") || chunk.substring(0,1).equals("/"))){
@@ -435,9 +427,7 @@ public class Listener extends scannerBaseListener {
         ASTNode returned = stack.pop();
         if(returned.getPay().split("\\.").length > 1){
             variable_to_type.put(returned.getPay(),"float");
-            System.out.println(returned.getPay());
             returned.setType("float");
-            System.out.println("Single return " + returned.getPay());
         }
         String var = variable_to_type.get(returned.getPay());
         if(var != null && var.equals("float")){
@@ -452,13 +442,6 @@ public class Listener extends scannerBaseListener {
         if(!used_variables.contains(ctx.id().getText())){
             used_variables.add(ctx.id().getText());
         }
-    }
-    @Override
-    public void exitAssign_expr(scannerParser.Assign_exprContext ctx) {
-
-
-        //System.out.println(head.printLeftAndRight(1));
-        //generated_code.add(generateCode());
     }
     @Override
     public void exitWrite_stmt(scannerParser.Write_stmtContext ctx){
@@ -592,9 +575,6 @@ public class Listener extends scannerBaseListener {
                 }
             }
             if(split.length > 2){
-                for(String k : split){
-                    System.out.print(k + " ");
-                }
                 if(split[2].substring(0,1).equals("$")){
                     split[2] = "r" + (Integer.parseInt(split[2].substring(2))-1);
                 }
@@ -682,7 +662,7 @@ public class Listener extends scannerBaseListener {
             sj.add(String.join(" ",split));
         }
         sj.add("sys halt\n");
-        System.out.println(generated_code.toString());
+        //System.out.println(generated_code.toString());
 
         for(String variable : used_variables) {
             System.out.println("var " + variable);
@@ -690,11 +670,6 @@ public class Listener extends scannerBaseListener {
         System.out.println("str newline \"\\n\"");
         System.out.println("label main");
         System.out.println(sj.toString());
-        System.out.println(variable_to_type.keySet());
-        System.out.println(variable_to_type.values());
-        for(int x =0;x<variable_to_type.values().size();x++){
-
-        };
         declHelper(key, context);
     }
     // return the table
