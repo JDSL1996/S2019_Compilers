@@ -4,15 +4,8 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.*;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public class Listener extends scannerBaseListener {
-    private ASTNode addop;
-    private ASTNode mulop;
-    private ASTNode leaf;
     private ASTNode head;
-    private ASTNode currentTop;
     private LinkedHashMap<String, String[][]> table = new LinkedHashMap<String, String[][]>();
     private ArrayList<String> while_start_tracker = new ArrayList();
     private ArrayList<String> while_end_tracker = new ArrayList();
@@ -20,7 +13,7 @@ public class Listener extends scannerBaseListener {
     private ArrayList<String> if_end_tracker = new ArrayList();
     private ArrayList<String> else_tracker = new ArrayList();
     private ArrayList<Boolean> if_else_tracker = new ArrayList();//If else is present
-    private ArrayList<Boolean> if_if_else_tracker = new ArrayList();//If else is present, for if tracking
+    private HashMap<String,String> variable_to_type = new HashMap<>();
     private int ifNum = 0;
     private int blockNum = 0;
     private int whileNum = 0;
@@ -132,7 +125,6 @@ public class Listener extends scannerBaseListener {
         if(ctx.else_part() != null){
             if(!ctx.else_part().getText().equals("")){
                 if_else_tracker.add(true);
-                if_if_else_tracker.add(true);
                 else_tracker.add("else_" + elseNum);
                 if_start_tracker.add("if_" + ifNum);
                 if_end_tracker.add("if_" + ifNum);
@@ -141,7 +133,6 @@ public class Listener extends scannerBaseListener {
                 ifNum++;
                 elseNum++;
             }else{
-                if_if_else_tracker.add(false);
                 if_start_tracker.add("if_" + ifNum);
                 if_else_tracker.add(false);
                 generated_code.add(operator + " " + OP1 + " " + OP2 + " " + "if_" + ifNum);
@@ -219,99 +210,34 @@ public class Listener extends scannerBaseListener {
 
 
     //=================================================End of: CONDITIONALS=================================================
-    @Override
-    public void enterAddop(scannerParser.AddopContext ctx) {
-        if (currentTop != null) {
-            ASTNode temp;
-            if(ctx.getText().equals("+")){
-                temp = new ASTNode(ctx.getText(), "ADDI");
-            }else{
-                temp = new ASTNode(ctx.getText(), "SUBI");
-            }
-            temp.setRight(currentTop);
-            temp.setLeft(leaf);
-            currentTop.setParent(temp);
-            currentTop = temp;
-        } else {
-            if(ctx.getText().equals("+")){
-                addop = new ASTNode(ctx.getText(), "ADDI");
-            }else{
-                addop = new ASTNode(ctx.getText(), "SUBI");
-            }
-            addop.setLeft(leaf);
-            currentTop = addop;
-        }
-    }
-    @Override
-    public void enterMulop(scannerParser.MulopContext ctx) {
-        if (currentTop != null) {
-            ASTNode temp;
-            if(ctx.getText().equals("*")){
-                temp = new ASTNode(ctx.getText(), "MULTI");
-            }else{
-                temp = new ASTNode(ctx.getText(), "DIVI");
-            }
-            temp.setRight(currentTop);
-            temp.setLeft(leaf);
-            currentTop.setParent(temp);
-            currentTop = temp;
-        } else {
-            if(ctx.getText().equals("*")){
-                mulop = new ASTNode(ctx.getText(), "MULTI");
-            }else{
-                mulop = new ASTNode(ctx.getText(), "DIVI");
-            }
-            mulop.setLeft(leaf);
-            currentTop = mulop;
-        }
-    }
-    @Override
-    public void exitPostfix_expr(scannerParser.Postfix_exprContext ctx) {
-        if (ctx.primary() != null) {
-            leaf = new ASTNode(ctx.primary().getText(),"primary");
-            //System.out.println(leaf.getPay());
-            boolean first = false;
-            if(addop != null){
-                first = true;
-                addop.setRight(leaf);
-                leaf.setParent(addop);
-                addop = null;
-            }else if(mulop != null){
-                first = true;
-                mulop.setRight(leaf);
-                leaf.setParent(mulop);
-                mulop = null;
-            }
-            // subtree of single operation
-            if (currentTop != null && !first) {
-                currentTop.setLeft(leaf);
-                leaf.setParent(currentTop);
-            }
-
-        }
-    }
     public ASTNode startTree(String context){
         String[] l_r = context.split(":=");
         ASTNode assignment = new ASTNode(":=", "assignment");
         ASTNode left = new ASTNode(l_r[0],"leaf");
         assignment.setLeft(left);
         if(l_r[1].length() > 0){
-            System.out.println(l_r[1]);
             ArrayList<String> postfix = infixToPostfix(l_r[1]);
-            for(String k: postfix){
-                System.out.print(k + ",");
-            }
-            ASTNode root = evaluatePostfix(postfix);
+//            for(String k: postfix){
+//                System.out.print(k + ",");
+//            }
+            ASTNode root;
+            root = evaluatePostfix(postfix);
+
             while(root.getParent() != null){
                 root = root.getParent();
             }
-            System.out.println("NEW TREE");
-            System.out.println(root.printLeftAndRight(1));
-            System.out.println("TREE END");
+//            System.out.println("NEW TREE");
+//            System.out.println(root.printLeftAndRight(1));
+//            System.out.println("TREE END");
+
             assignment.setRight(root);
+            if(root.getType().equals("float")){
+                variable_to_type.put(l_r[0],"float");
+            }
         }
         return assignment;
     }
+    //Set up order for infix expression
     public int Prec(char ch)
     {
         switch (ch)
@@ -415,38 +341,89 @@ public class Listener extends scannerBaseListener {
         for(int i=0;i<exp.size();i++)
         {
             String chunk = exp.get(i);
+            System.out.println(chunk);
             // If the scanned character is an operand (number here),
             // push it to the stack.
             if(!(chunk.substring(0,1).equals("+") || chunk.substring(0,1).equals("-") || chunk.substring(0,1).equals("*") || chunk.substring(0,1).equals("/"))){
-                stack.push(new ASTNode(chunk,"primary"));
+                ASTNode newNode = new ASTNode(chunk,"primary");
+                stack.push(newNode);
             }
             else
             {
                 ASTNode val1 = stack.pop();
                 ASTNode val2 = stack.pop();
+                ASTNode operator;
+                boolean isFloat = false;
+                if(val1.getInstruction().equals("primary")) {
+                    isFloat = val1.getPay().split(".").length > 1;
+                    if(isFloat){
+                        val1.setType("float");
+                    }
+                }
+                if(val2.getInstruction().equals("primary")) {
+                    isFloat = val2.getPay().split(".").length > 1;
+                    if(isFloat){
+                        val2.setType("float");
+                    }
+                }
+                if(val1.getType().equals("float")) {
+                    isFloat = true;
+                }
+                if(val2.getType().equals("float")){
+                    isFloat = true;
+                }
+                String var1 = variable_to_type.get(val1.getPay());
+                String var2 = variable_to_type.get(val2.getPay());
+                if(var1 != null && var1.equals("float")) {
+                    isFloat = true;
+                }
+                if(var2 != null && var2.equals("float")){
+                    isFloat = true;
+                }
                 if(chunk.substring(0,1).equals("+")){
-                    ASTNode operator = new ASTNode(chunk,"ADDI");
+                    if(isFloat){
+                        operator = new ASTNode(chunk,"ADDR");
+                        operator.setType("float");
+                    }else{
+                        operator = new ASTNode(chunk,"ADDI");
+                    }
                     operator.setRight(val1);
                     operator.setLeft(val2);
+
                     val2.setParent(operator);
                     val1.setParent(operator);
                     stack.push(operator);
                 }else if(chunk.substring(0,1).equals("-")){
-                    ASTNode operator = new ASTNode(chunk,"SUBI");
+                    if(isFloat){
+                        operator = new ASTNode(chunk,"SUBR");
+                        operator.setType("float");
+                    }else{
+                        operator = new ASTNode(chunk,"SUBI");
+                    }
                     operator.setRight(val1);
                     operator.setLeft(val2);
                     stack.push(operator);
                     val2.setParent(operator);
                     val1.setParent(operator);
                 }else if(chunk.substring(0,1).equals("/")){
-                    ASTNode operator = new ASTNode(chunk,"DIVI");
+                    if(isFloat){
+                        operator = new ASTNode(chunk,"DIVR");
+                        operator.setType("float");
+                    }else{
+                        operator = new ASTNode(chunk,"DIVI");
+                    }
                     operator.setRight(val1);
                     operator.setLeft(val2);
                     stack.push(operator);
                     val2.setParent(operator);
                     val1.setParent(operator);
                 }else if(chunk.substring(0,1).equals("*")){
-                    ASTNode operator = new ASTNode(chunk,"MULTI");
+                    if(isFloat){
+                        operator = new ASTNode(chunk,"MULTR");
+                        operator.setType("float");
+                    }else{
+                        operator = new ASTNode(chunk,"MULTI");
+                    }
                     operator.setRight(val1);
                     operator.setLeft(val2);
                     stack.push(operator);
@@ -455,21 +432,26 @@ public class Listener extends scannerBaseListener {
                 }
             }
         }
-        return stack.pop();
+        ASTNode returned = stack.pop();
+        if(returned.getPay().split("\\.").length > 1){
+            variable_to_type.put(returned.getPay(),"float");
+            System.out.println(returned.getPay());
+            returned.setType("float");
+            System.out.println("Single return " + returned.getPay());
+        }
+        String var = variable_to_type.get(returned.getPay());
+        if(var != null && var.equals("float")){
+            returned.setType("float");
+        }
+        return returned;
     }
     @Override
     public void enterAssign_expr(scannerParser.Assign_exprContext ctx) {
         head = startTree(ctx.getText());
-        getPostOrder(head);
-//        head = new ASTNode(":=","assignment");
-//
-//        head.setLeft(new ASTNode(ctx.id().getText(),"primary"));
+        getPostOrder(head);//Used to make the tree for head
         if(!used_variables.contains(ctx.id().getText())){
             used_variables.add(ctx.id().getText());
         }
-        mulop = null;
-        addop = null;
-        currentTop = null;
     }
     @Override
     public void exitAssign_expr(scannerParser.Assign_exprContext ctx) {
@@ -483,7 +465,12 @@ public class Listener extends scannerBaseListener {
         String[] split = ctx.id_list().getText().split(",");
         for(int x = 0;x<split.length;x++){
             if(x%2 == 0){
-                generated_code.add("WRITEI " + split[x]);
+                String type = variable_to_type.get(split[x]);
+                if(type!=null && type.equals("float")){
+                    generated_code.add("WRITER " + split[x]);
+                }else{
+                    generated_code.add("WRITEI " + split[x]);
+                }
             }else{
                 generated_code.add("WRITES " + split[x]);
             }
@@ -503,8 +490,8 @@ public class Listener extends scannerBaseListener {
         }
 
     }
-    String prevTemp = null;
-    public void getPostOrder(ASTNode node){
+    private String prevTemp = null;
+    private void getPostOrder(ASTNode node){
         if (node == null){
             return;
         }
@@ -520,55 +507,19 @@ public class Listener extends scannerBaseListener {
             node.setOP2(node.getRight().getResult(), "OP");
             node.setResult("$T" + localTemp);
             prevTemp = "$T" + localTemp;
-
             generated_code.add(node.generateCode());
         }else if(node.getPay().equals(":=")){
             if(prevTemp != null){
-                generated_code.add(";using previous temp");
                 node.setOP2(node.getLeft().getPay(),"TEMP");
                 node.setOP1(prevTemp,"TEMP");
                 generated_code.add(node.generateCode());
-                tempCount++;
             }else{
-                generated_code.add(";Creating new temp");
                 node.setOP1(node.getLeft().getPay(),"primary");
                 node.setOP2(node.getRight().getResult(),"TEMP");
                 node.setResult("$T" + tempCount);
                 generated_code.add(node.generateCode());
-                tempCount++;
             }
         }
-    }
-    public String generateCode(){
-        prevTemp = null;
-        getPostOrder(head);
-        return "";
-//        ASTNode temp_node = head;
-//        //Go to the bottom right
-//        while(temp_node.getRight()!= null){
-//            temp_node = temp_node.getRight();
-//        }
-//        StringJoiner sj = new StringJoiner("\n");
-//        String prevTemp = null;
-//        while(temp_node.getParent() != null){
-//            ASTNode op = temp_node.getParent();
-//            if(prevTemp != null){
-//                op.setOP1(prevTemp, "TEMP");
-//                op.setOP2(op.getLeft().getPay(), op.getLeft().getInstruction());
-//            }else{
-//                op.setOP1(op.getLeft().getPay(), op.getLeft().getInstruction());
-//                op.setOP2(temp_node.getPay(), temp_node.getInstruction());
-//            }
-//            op.setResult("$T" + tempCount);
-//            prevTemp = "$T" + tempCount;
-//            sj.add(op.generateCode());
-//            temp_node = temp_node.getParent();
-//            if(temp_node.getParent() != null){
-//                tempCount++;
-//            }
-//        }
-//        return sj.toString();
-        
     }
     // addop the key on function entry
     @Override
@@ -619,13 +570,11 @@ public class Listener extends scannerBaseListener {
         String[] lines = generated_code.toString().split("\n");
         StringJoiner sj = new StringJoiner("\n");
         for(String line : lines){
-            System.out.println(line);
             String[] split = line.split(" ");
             if(split.length > 1){
                 if(split[0].equals("STOREI")){
                     split[0] = "move";
                 }
-                System.out.println("!!!" + split[0]);
                 if(split[1].substring(0,1).equals("$")){
                     split[1] = "r" + (Integer.parseInt(split[1].substring(2))-1);
                 }
@@ -638,10 +587,14 @@ public class Listener extends scannerBaseListener {
                     split[0] = "sys writei";
                 }else if(split[0].equals("WRITES")){
                     split[0] = "sys writes";
+                }else if(split[0].equals("WRITER")){
+                    split[0] = "sys writer";
                 }
             }
             if(split.length > 2){
-                
+                for(String k : split){
+                    System.out.print(k + " ");
+                }
                 if(split[2].substring(0,1).equals("$")){
                     split[2] = "r" + (Integer.parseInt(split[2].substring(2))-1);
                 }
@@ -654,23 +607,38 @@ public class Listener extends scannerBaseListener {
                     String[] tempSplit = new String[1];
                     tempSplit[0] = "move " + split[1] + " " + split[3] + "\naddi " + split[2] + " " + split[3];
                     split = tempSplit;
+                }else if(split[0].equals("ADDR")){
+                    String[] tempSplit = new String[1];
+                    tempSplit[0] = "move " + split[1] + " " + split[3] + "\naddr " + split[2] + " " + split[3];
+                    split = tempSplit;
                 }else if(split[0].equals("SUBI")){
                     String[] tempSplit = new String[1];
                     tempSplit[0] = "move " + split[1] + " " + split[3] + "\nsubi " + split[2] + " " + split[3];
+                    split = tempSplit;
+                }else if(split[0].equals("SUBR")){
+                    String[] tempSplit = new String[1];
+                    tempSplit[0] = "move " + split[1] + " " + split[3] + "\nsubr " + split[2] + " " + split[3];
                     split = tempSplit;
                 }else if(split[0].equals("MULTI")){
                     String[] tempSplit = new String[1];
                     tempSplit[0] = "move " + split[1] + " " + split[3] + "\nmuli " + split[2] + " " + split[3];
                     split = tempSplit;
+                }else if(split[0].equals("MULTR")){
+                    String[] tempSplit = new String[1];
+                    tempSplit[0] = "move " + split[1] + " " + split[3] + "\nmulr " + split[2] + " " + split[3];
+                    split = tempSplit;
                 }else if(split[0].equals("DIVI")){
                     String[] tempSplit = new String[1];
                     tempSplit[0] = "move " + split[1] + " " + split[3] + "\ndivi " + split[2] + " " + split[3];
+                    split = tempSplit;
+                }else if(split[0].equals("DIVR")){
+                    String[] tempSplit = new String[1];
+                    tempSplit[0] = "move " + split[1] + " " + split[3] + "\ndivr " + split[2] + " " + split[3];
                     split = tempSplit;
                 }else if(split[0].equals("NE")){
                     String r_alloc = "move " + split[2] + " r" + tempCount;
                     String comp = "cmpi " + split[1] + " r" + tempCount;
                     String jmp = "jne " + split[3];
-                    tempCount++;
                     String tempSplit[] = new String[1];
                     tempSplit[0] = r_alloc + "\n" + comp + "\n" + jmp;
                     split = tempSplit;
@@ -678,7 +646,6 @@ public class Listener extends scannerBaseListener {
                     String r_alloc = "move " + split[2] + " r" + tempCount;
                     String comp = "cmpi " + split[1] + " r" + tempCount;
                     String jmp = "jlt " + split[3];
-                    tempCount++;
                     String tempSplit[] = new String[1];
                     tempSplit[0] = r_alloc + "\n" + comp + "\n" + jmp;
                     split = tempSplit;
@@ -686,7 +653,6 @@ public class Listener extends scannerBaseListener {
                     String r_alloc = "move " + split[2] + " r" + tempCount;
                     String comp = "cmpi " + split[1] + " r" + tempCount;
                     String jmp = "jle " + split[3];
-                    tempCount++;
                     String tempSplit[] = new String[1];
                     tempSplit[0] = r_alloc + "\n" + comp + "\n" + jmp;
                     split = tempSplit;
@@ -694,7 +660,6 @@ public class Listener extends scannerBaseListener {
                     String r_alloc = "move " + split[2] + " r" + tempCount;
                     String comp = "cmpi " + split[1] + " r" + tempCount;
                     String jmp = "jgt " + split[3];
-                    tempCount++;
                     String tempSplit[] = new String[1];
                     tempSplit[0] = r_alloc + "\n" + comp + "\n" + jmp;
                     split = tempSplit;
@@ -702,7 +667,6 @@ public class Listener extends scannerBaseListener {
                     String r_alloc = "move " + split[2] + " r" + tempCount;
                     String comp = "cmpi " + split[1] + " r" + tempCount;
                     String jmp = "jge " + split[3];
-                    tempCount++;
                     String tempSplit[] = new String[1];
                     tempSplit[0] = r_alloc + "\n" + comp + "\n" + jmp;
                     split = tempSplit;
@@ -710,7 +674,6 @@ public class Listener extends scannerBaseListener {
                     String r_alloc = "move " + split[2] + " r" + tempCount;
                     String comp = "cmpi " + split[1] + " r" + tempCount;
                     String jmp = "jeq " + split[3];
-                    tempCount++;
                     String tempSplit[] = new String[1];
                     tempSplit[0] = r_alloc + "\n" + comp + "\n" + jmp;
                     split = tempSplit;
@@ -727,6 +690,11 @@ public class Listener extends scannerBaseListener {
         System.out.println("str newline \"\\n\"");
         System.out.println("label main");
         System.out.println(sj.toString());
+        System.out.println(variable_to_type.keySet());
+        System.out.println(variable_to_type.values());
+        for(int x =0;x<variable_to_type.values().size();x++){
+
+        };
         declHelper(key, context);
     }
     // return the table

@@ -9,8 +9,7 @@ public class ASTNode {
     private String op2 = "";
     private String opType1 = "";
     private String opType2 = "";
-    private String variable = "";
-    private String value = "";
+    private String type = "";
     private String instruction;
     public ASTNode(String inPay, String instruction) {
         payload = inPay;
@@ -24,6 +23,10 @@ public class ASTNode {
         op2 = op;
         this.opType2 = opType2;
     }
+    public void setType(String type){
+        this.type = type;
+    }
+    public String getType(){return type;}
     public void setResult(String temp){
         this.temp = temp;
     }
@@ -36,6 +39,9 @@ public class ASTNode {
     }
     public String getInstruction(){
         return instruction;
+    }
+    public void setInstruction(String instruction){
+        this.instruction = instruction;
     }
     public String generateCode(){
         if(instruction.equals("assignment")){

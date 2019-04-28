@@ -1,0 +1,74 @@
+7.0
+7.0
+Single return 7.0
+100
+1
+num
+0.5
+approx
+num
+approx
+/
++
+*
+newapprox
+i
+1
+-
+move 7.0 $T4 move r3 num move 100 $T7 move r6 i move 1 $T10 move r9 j move num $T13 move r12 approx EQ i 0 while_0 DIVR num approx $T20 ADDR approx $T20 $T18 MULTR 0.5 $T18 $T16 move r15 newapprox move r15 approx SUBI i 1 $T28 move r27 i STOREI 7.0 $T4
+STOREI $T4 num
+STOREI 100 $T7
+STOREI $T7 i
+STOREI 1 $T10
+STOREI $T10 j
+STOREI num $T13
+STOREI $T13 approx
+label while_start_0
+EQ i 0 while_0
+DIVR num approx $T20
+ADDR approx $T20 $T18
+MULTR 0.5 $T18 $T16
+STOREI $T16 newapprox
+STOREI $T16 approx
+SUBI i 1 $T28
+STOREI $T28 i
+jmp while_start_0
+label while_0
+WRITER approx
+var newapprox
+var num
+var i
+var j
+var approx
+str newline "\n"
+label main
+move 7.0 r3
+move r3 num
+move 100 r6
+move r6 i
+move 1 r9
+move r9 j
+move num r12
+move r12 approx
+label while_start_0
+move 0 r30
+cmpi i r30
+jeq while_0
+move num r19
+divr approx r19
+move approx r17
+addr r19 r17
+move 0.5 r15
+mulr r17 r15
+move r15 newapprox
+move r15 approx
+move i r27
+subi 1 r27
+move r27 i
+jmp while_start_0
+label while_0
+sys writer approx
+sys halt
+
+[newapprox, num, 7.0, approx]
+[float, float, float, float]

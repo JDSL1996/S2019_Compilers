@@ -1,70 +1,145 @@
-var p
 var a
 var b
-var u
-var g
-var k
+var c
+var d
+var t
+var x
+var y
+var z
 str newline "\n"
 label main
-;Creating new temp
 move 1 r3
 move r3 a
-;Creating new temp
-move 1 r7
-move r7 b
-label while_start_0
-move 80 r45
-cmpi a r45
-jgt while_0
-move 1 r46
-cmpi b r46
-jne if_0
-move 1 r11
-muli a r11
-;using previous temp
-move r11 g
-sys writei g
+move 2 r6
+move r6 b
+move 10 r9
+move r9 c
+move 20 r12
+move r12 d
+sys writei a
 sys writes newline
-label if_0
-move 2 r47
-cmpi b r47
-jne if_1
-move 2 r17
-muli a r17
-;using previous temp
-move r17 p
-sys writei p
+sys writei b
 sys writes newline
-label if_1
-move 3 r48
-cmpi b r48
-jne else_0
-move 3 r49
-cmpi b r49
-jne if_2
-move 3 r23
-muli a r23
-;using previous temp
-move r23 k
-sys writei k
+sys writei c
 sys writes newline
-jmp if_2
-label else_0
-move 4 r29
-muli a r29
-;using previous temp
-move r29 u
-sys writei u
+sys writei d
 sys writes newline
-label if_2
-move b r35
-addi 1 r35
-;using previous temp
-move r35 b
-move a r41
-addi 20 r41
-;using previous temp
-move r41 a
-jmp while_start_0
-label while_0
+move a r15
+addi b r15
+move r15 a
+sys writei a
+sys writes newline
+move a r20
+muli c r20
+move r20 b
+sys writei b
+sys writes newline
+move 0 r26
+subi a r26
+move r26 r25
+addi b r25
+move r25 c
+sys writei c
+sys writes newline
+move 0 r32
+subi d r32
+move r32 d
+sys writei d
+sys writes newline
+move a r39
+addi b r39
+move d r42
+addi c r42
+move r39 r38
+muli r42 r38
+move a r48
+addi b r48
+move r48 r47
+addi c r47
+move r47 r46
+addi d r46
+move r46 r45
+divi a r45
+move r38 r37
+subi r45 r37
+move r37 a
+sys writei a
+sys writes newline
+move a r56
+addi 10 r56
+move r56 a
+sys writei a
+sys writes newline
+move b r62
+addi a r62
+move r62 r61
+addi 10 r61
+move r61 b
+sys writei b
+sys writes newline
+move 0 r68
+subi 10 r68
+move r68 c
+sys writei c
+sys writes newline
+move r68 x
+move r68 y
+move r68 z
+sys writer x
+sys writes newline
+sys writer z
+sys writes newline
+sys writer y
+sys writes newline
+move z r82
+divr 2.0 r82
+move r82 x
+move z r87
+divr y r87
+move r87 y
+sys writer x
+sys writes newline
+sys writer y
+sys writes newline
+move x r94
+addr y r94
+move r94 r93
+addr z r93
+move r93 r92
+divr z r92
+move r92 t
+sys writer t
+sys writes newline
+move t r101
+mulr t r101
+move r101 t
+sys writer t
+sys writes newline
+move t r112
+addr z r112
+move r112 r111
+addr t r111
+move t r116
+divr 2.0 r116
+move r111 r110
+addr r116 r110
+move z r119
+divr 4.0 r119
+move r110 r109
+addr r119 r109
+move z r122
+divr 5.0 r122
+move r109 r108
+addr r122 r108
+move z r125
+divr 6.0 r125
+move r108 r107
+addr r125 r107
+move z r128
+divr 7.0 r128
+move r107 r106
+addr r128 r106
+move r106 t
+sys writer t
+sys writes newline
 sys halt
